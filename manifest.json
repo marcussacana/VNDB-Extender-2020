@@ -1,0 +1,45 @@
+{ 
+   "author":"Evert Verschoor & Marcussacana",
+   "content_scripts":[ 
+      { 
+         "css":[ 
+            "styles/default.css"
+         ],
+         "js":[ 
+            "scripts/httpController.js",
+            "scripts/storageController.js",
+            "scripts/preferencesController.js",
+            "scripts/vnAssetsController.js",
+            "scripts/buildController.js",
+            "scripts/mainController.js",
+            "scripts/default.js"
+         ],
+         "matches":[ 
+            "*://vndb.org/u*/list",
+            "*://vndb.org/u*/votes",
+            "*://vndb.org/u*/wish",
+            "*://vndb.org/u*/list?c=*;v=*;t=*",
+            "*://vndb.org/u*/votes?c=*",
+            "*://vndb.org/u*/wish?f=*",
+            "*://vndb.org/u*/ulist?*",
+            "*://vndb.org/v/*"
+         ]
+      }
+   ],
+   "description":"Improves readability and automatically adds images and useful information to VNDB visual novel lists.",
+   "icons":{ 
+      "128":"icons/icon-128.png",
+      "16":"icons/icon-16.png",
+      "48":"icons/icon-48.png",
+      "96":"icons/icon-96.png"
+   },
+   "manifest_version":2,
+   "name":"VNDB Extender",
+   "permissions":[ 
+      "https://vndb.org/*",
+      "webRequest",
+      "storage"
+   ],
+   "update_url":"https://clients2.google.com/service/update2/crx",
+   "version":"1.7"
+}
