@@ -19,4 +19,8 @@ A updated version of the VNDB Extender
 2 - Open your browser Extension Manager tab  
 3 - Then drag&drop the .crx to your browser and confirm the installation
 
+
+### Screenshot:
+![image](https://user-images.githubusercontent.com/10576957/71759552-8a132b80-2e8d-11ea-9c88-58e3200e3431.png)
+
 ###  Created by Evert Verschoor; Updated by marcussacana
