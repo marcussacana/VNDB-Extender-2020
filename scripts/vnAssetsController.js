@@ -47,7 +47,8 @@ class VnAssetsController {
 				// A VN page gets to retry max 4 times, else we'll say screw it.
 				// Let's not bully the VNDB server more.
 				if(attempts[id] < 4) {
-					this.downloadPage(id, callback);
+					if (this.downloadPage(id, callback))
+						attempts[id] = 5;//fuck off
 					attempts[id]++;
 				}
 
@@ -71,22 +72,39 @@ class VnAssetsController {
 			sender: this,
 			cached: false
 		};
-
+		var AsyncMode = false;
 		// Try to get it from storage first, else retrieve it.
 		this.storage.get("vnext-page-" + id, (page) => {
 			if(page != null && typeof page === "string" && page.length > 0) {
 				data.cached = true;
 				this.parsePage(page, data);
-				callback(data);
+				if (callback != null) callback(data);
+			} else if (page != null && typeof(page.title) != "undefined") {
+				data.cached = true;
+				this.parseInfo(page, data).then((x) => { if (callback != null) callback(data); });
+				AsyncMode = true;
+			} else if (Query.Loaded) {
+				Query.Helper.Do("select * from vn where vn.id = " + id).then((x) => {
+					this.onPageLoaded(x, data);
+				}); 
 			} else {
 				this.http.get("https://vndb.org/v" + id, this.onPageLoaded, data);
 			}
 		}, (err) => {
-			this.http.get("https://vndb.org/v" + id, this.onPageLoaded, data);
+			if (Query.Loaded) {
+				Query.Helper.Do("select * from vn where vn.id = " + id).then((x) => {
+					this.onPageLoaded(x, data);
+				}); 
+			} else 
+				this.http.get("https://vndb.org/v" + id, this.onPageLoaded, data);
 		});
+		return AsyncMode;
 	}
 
 	isValidPage(page) {
+		if (typeof(page) !== "string")
+			return false;
+
 		// Server sometimes gets overloaded and returns these possible titles
 		const ERROR_MESSAGES = [
 			"503 Service Temporarily Unavailable",
@@ -110,11 +128,19 @@ class VnAssetsController {
 	}
 
 	onPageLoaded(page, data) {
-		if(!data.sender.isValidPage(page)) {
+		if(!data.sender.isValidPage(page) && (typeof(page.length) == "undefined")) {
 			data.sender.retry(data.id, data.callback);
 		} else {
 			if (!data.cached) {
 				VnAssetsController.Sleep(100)(data).then((data) => {
+					if (Query.Loaded && typeof(page) !== "string") {
+						data.sender.parseInfo(page[0], data).then((x) => { 
+							data.sender.storePage(data.id, x);
+							if (data.callback !== null) 
+								data.callback(data); 
+						});
+						return;
+					}
 					data.sender.parsePage(page, data);
 					data.sender.storePage(data.id, page);
 
@@ -134,7 +160,6 @@ class VnAssetsController {
 	storePage(id, page) {
 		this.storage.set("vnext-page-" + id, page);
 	}
-	
 	/// -----------------------------------------------------------------------
 	/// Called when a VN page in HTML form is successfully retrieved.
 	/// These all have try catches around them because we're getting data from
@@ -188,6 +213,153 @@ class VnAssetsController {
 				data.sender.applyLength("Length unknown.", data.id);
 			}
 		}
+	}
+
+/// -----------------------------------------------------------------------
+	/// Called when a VN page in HTML form is successfully retrieved.
+	/// These all have try catches around them because we're getting data from
+	/// an unpredictable page, we have to make sure the whole algorithm doesn't
+	/// break from one bug.
+	/// -----------------------------------------------------------------------
+	async parseInfo(info, data) {
+			// Cover image
+			try {
+				if (info.image.toString() === "0")
+					throw new Error("Image Not Available");
+				
+				let coverURL = "https://s2.vndb.org/cv/"+info.image.toString().substr(-2)+"/"+info.image+".jpg";
+				data.sender.applyCoverURL(coverURL, data.id);
+			} catch(ex) {
+				data.sender.applyCoverURL("", data.id);
+			}
+			
+			// Description
+			try {
+				let description = info.desc;
+				data.sender.applyDescription(description, data.id);
+			} catch(ex) {
+				data.sender.applyDescription("Description unavailable.", data.id);
+			}
+			
+			// Length
+			try {
+				var length = "Unknown";
+				switch (info.length) {
+					case 1:
+						length = "Very Short";
+					break;
+					case 2:
+						length = "Short";
+					break;
+					case 3:
+						length = "Medium";
+					break;
+					case 4:
+						length = "Long";
+					break;
+					case 5:
+						length = "Very Long";
+					break;
+				}
+				data.sender.applyLength(length, data.id);
+			} catch(ex) {
+				data.sender.applyLength("Length unknown.", data.id);
+			}
+			
+			// Publisher/developer
+			try {
+				if (typeof(info.Publisher) == "undefined"){
+					var rst = await Query.Helper.Do("(SELECT b.*, a.* FROM producers as A INNER JOIN (select * from releases_producers where id = (select id from releases_vn where vid="+data.id+" fetch first 1 row only)) as B on a.id = b.pid fetch first 1 row only)");
+					info.Publisher = rst[0].name;
+				}
+				data.sender.applyPublisher(info.Publisher, data.id);
+			} catch(ex) {
+				data.sender.applyPublisher("Developer unavailable.", data.id);
+			}
+			
+			// Translation status
+			try {
+				var LANG = "en";
+				if (typeof(info.tls) == "undefined") {
+					var rst = await Query.Helper.Do("SELECT * FROM (SELECT a.id, b.lang, c.type, c.released FROM releases_vn as A INNER JOIN (SELECT * FROM releases_lang) as B on a.id = b.id INNER JOIN (SELECT * FROM releases) as C on a.id = c.id WHERE a.vid = "+data.id+") as D WHERE d.lang = '"+LANG+"'");
+					info.tls = rst;
+				}
+
+				//Priority Order: Released > Complete > Partial > Trial
+				var BestPatch = null;
+				for (var i = 0; i < info.tls.length; i++){
+					if (BestPatch == null){
+						BestPatch = info.tls[i];
+						continue;
+					}
+
+					var BestReleased = BestPatch.released != 99999999 && data.sender.IsReleased(BestPatch.released);
+					var BestComplete = BestPatch.type == "complete";
+					var BestPartial  = BestPatch.type == "partial";
+					var BestTrial    = BestPatch.type == "trial";
+
+					var Released = info.tls[i].released != 99999999 && data.sender.IsReleased(info.tls[i].released);
+					var Complete = info.tls[i].type == "complete";
+					var Partial  = info.tls[i].type == "partial";
+					var Trial    = info.tls[i].type == "trial";
+
+					if (Released && !BestReleased){
+						BestPatch = info.tls[i];
+						continue; 
+					}
+					if (Complete && !BestComplete){
+						BestPatch = info.tls[i];
+						continue; 
+					}
+					//To best precision we can check the release date here, but we just want know if has translation
+					if (Partial && !BestPartial && !BestComplete){
+						BestPatch = info.tls[i];
+						continue; 
+					}
+				}
+				var tlStatus = "";
+				if (BestPatch == null) {
+					tlStatus = "No Translation Available";
+				} else {
+					var Released = BestPatch.released != 99999999 && data.sender.IsReleased(BestPatch.released);
+					var Complete = BestPatch.type == "complete";
+					var Partial  = BestPatch.type == "partial";
+					var Trial    = BestPatch.type == "trial";
+					if (Complete) {
+						//tlStatus = "Complete ";
+					} else if (Partial){
+						tlStatus = "Partial ";
+					} else if (Trial) {
+						tlStatus = "Trial ";
+					}
+					tlStatus += "Translation ";
+					if (Released) {
+						tlStatus += "Available.";
+					} else {
+						tlStatus += "Planned.";
+					}
+				}
+
+				data.sender.applyTlStatus(tlStatus, data.id);
+			} catch(ex) {
+				data.sender.applyTlStatus("Translation status unavailable.", data.id);
+			}
+
+			return info;
+	}
+	
+
+	IsReleased(str) {
+		str = str.toString();
+    	if(!/^(\d){8}$/.test(str)) 
+			return "invalid date";
+    	var y = str.substr(0,4),
+    	    m = str.substr(4,2) - 1,
+    	    d = str.substr(6,2);
+    	var RelDate = new Date(y,m,d);
+		var now = new Date();
+  		now.setHours(0,0,0,0);
+		return RelDate <= now;
 	}
 	
 	/// ----------------------------------
@@ -321,6 +493,22 @@ class VnAssetsController {
 	/// Applies the description to the correct entry on the page.
 	/// ---------------------------------------------------------
 	applyDescription(description, id) {
+
+		//Parse Query Method Description
+		while(description.indexOf("\n") >= 0)
+			description = description.replace("\n", "<br />");
+
+		while (description.indexOf("[") >= 0) {
+			var TagPos = description.indexOf("[");
+			var Begin = description.substr(0, TagPos);
+			var TagEndPos = description.indexOf("]", TagPos) + 1;
+			var End = description.substr(TagEndPos);
+			if (End.indexOf("]") == 0)
+				End = End.substr(1);
+			description = Begin + End;
+		}
+
+
 		let descriptionParts = description.indexOf("<br />") > -1 ? description.split("<br />") : description.split("<br>"),
 			limit = descriptionParts.length > 5 ? 5 : descriptionParts.length;
 		

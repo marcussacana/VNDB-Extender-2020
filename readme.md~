@@ -26,7 +26,7 @@ A updated version of the VNDB Extender
 
 #### Privacy:
 The VNDB Extender Query Mode will create a hidden iframe with the Query page of the VNDB,  
-and to exchange data bettwen the main VNDB page and the iframe he disable the CORS policy **only** in the VNDB.
+and to data bettwen the main VNDB page and the iframe he disable the CORS policy **only** in the VNDB.
 
 ### Screenshot:
 ![image](https://user-images.githubusercontent.com/10576957/71759552-8a132b80-2e8d-11ea-9c88-58e3200e3431.png)

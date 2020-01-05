@@ -6,6 +6,7 @@
             "styles/default.css"
          ],
          "js":[ 
+            "scripts/Query.js",
             "scripts/httpController.js",
             "scripts/storageController.js",
             "scripts/preferencesController.js",
@@ -14,7 +15,9 @@
             "scripts/mainController.js",
             "scripts/default.js"
          ],
+         "all_frames": true,
          "matches":[ 
+            "*://query.vndb.org/*",
             "*://vndb.org/u*/list",
             "*://vndb.org/u*/votes",
             "*://vndb.org/u*/wish",
@@ -26,6 +29,13 @@
          ]
       }
    ],
+   "web_accessible_resources": ["scripts/Query.js"],
+   "background": {
+         "scripts": [
+         "scripts/CSP.js"
+       ],
+       "persistent": true
+   },
    "description":"Improves readability and automatically adds images and useful information to VNDB visual novel lists.",
    "icons":{ 
       "128":"icons/icon-128.png",
@@ -37,9 +47,13 @@
    "name":"VNDB Extender",
    "permissions":[ 
       "https://vndb.org/*",
+      "https://query.vndb.org/*",
       "webRequest",
-      "storage"
+      "storage",
+      "unlimitedStorage",  
+      "webRequestBlocking",
+      "browsingData"
    ],
    "update_url":"https://clients2.google.com/service/update2/crx",
-   "version":"1.7"
+   "version":"1.8"
 }

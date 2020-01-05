@@ -319,7 +319,7 @@ class MainController {
 
 				entries[i].getElementsByClassName("tc6")[0].getElementsByTagName("b")[0].remove();
 				var Title = entries[i].getElementsByClassName("tc1");
-				if (Title.length == 0)					
+				if (Title.length == 0)
 					Title = entries[i].getElementsByClassName("tc_t");
 
 				// Gather all the data we need about the vn
@@ -424,6 +424,8 @@ class MainController {
 		}
 		var Next = VN.getAttribute("next");
 		if (IMG === ""){
+			var Darken = VN.getElementsByClassName("vnext-darken")[0];
+			Darken.classList.add("always-visible");
 			setTimeout(() => { MainController.showCover(Next) }, 100);
 			return;
 		}

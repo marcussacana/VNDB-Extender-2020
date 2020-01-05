@@ -53,6 +53,10 @@
 	animation-duration: 0.2s;
 }
 
+div.NSFW:not(:hover){
+    
+}
+
 .vnext-darken.always-visible:hover {
 	animation: none;
 }
