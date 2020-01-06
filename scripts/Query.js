@@ -75,7 +75,7 @@ class Query {
 		Query.Finished = false;
 		this.BeginInvoke(script);
 		while (!Query.Finished)
-			await this.timeout(50);
+			await this.timeout(10);
 
 		return Query.Response;
 	}
@@ -88,7 +88,7 @@ class Query {
         await this.Invoke('ace.edit("query-ace-editor").setValue("'+query.replace("\"", "\\\"")+'"); true;');
 		await this.Invoke('var bnt = document.getElementsByTagName("button"); for (var i = 0; i < bnt.length; i++) if (bnt[i].className.indexOf("Button_primary") >= 0) { bnt[i].click(); break; } true;');
 		while (true) {		
-			await this.timeout(500);
+			await this.timeout(100);
 			var Result = await this.Invoke('var a = document.getElementsByTagName("a"); for (var i = 0; i < a.length; i++) if (a[i].className.indexOf("QueryResultHeader_iconLink") >= 0 && a[i].innerHTML.indexOf("json") >= 0) { a = a[i]; break; } a.href;');
 			if (Result == undefined)
 				continue;

@@ -222,6 +222,9 @@ class VnAssetsController {
 	/// break from one bug.
 	/// -----------------------------------------------------------------------
 	async parseInfo(info, data) {
+			if (typeof(info.releases) == "undefined")
+				info.releases = await Query.Helper.Do("select l.lang, r.type, name, released from (releases_lang as l join (select * from releases_producers) as rp on l.id = rp.id join (select * from producers) as p on rp.pid = p.id join (select * from releases) as r on l.id = r.id ) where r.id in (select id from releases_vn where vid = "+data.id+")");
+
 			// Cover image
 			try {
 				if (info.image.toString() === "0")
@@ -268,11 +271,8 @@ class VnAssetsController {
 			
 			// Publisher/developer
 			try {
-				if (typeof(info.Publisher) == "undefined"){
-					var rst = await Query.Helper.Do("(SELECT b.*, a.* FROM producers as A INNER JOIN (select * from releases_producers where id = (select id from releases_vn where vid="+data.id+" fetch first 1 row only)) as B on a.id = b.pid fetch first 1 row only)");
-					info.Publisher = rst[0].name;
-				}
-				data.sender.applyPublisher(info.Publisher, data.id);
+
+				data.sender.applyPublisher(info.releases[0].name, data.id);
 			} catch(ex) {
 				data.sender.applyPublisher("Developer unavailable.", data.id);
 			}
@@ -280,16 +280,14 @@ class VnAssetsController {
 			// Translation status
 			try {
 				var LANG = "en";
-				if (typeof(info.tls) == "undefined") {
-					var rst = await Query.Helper.Do("SELECT * FROM (SELECT a.id, b.lang, c.type, c.released FROM releases_vn as A INNER JOIN (SELECT * FROM releases_lang) as B on a.id = b.id INNER JOIN (SELECT * FROM releases) as C on a.id = c.id WHERE a.vid = "+data.id+") as D WHERE d.lang = '"+LANG+"'");
-					info.tls = rst;
-				}
 
 				//Priority Order: Released > Complete > Partial > Trial
 				var BestPatch = null;
-				for (var i = 0; i < info.tls.length; i++){
+				for (var i = 0; i < info.releases.length; i++){
+					if (info.releases[i].lang != LANG)
+						continue;
 					if (BestPatch == null){
-						BestPatch = info.tls[i];
+						BestPatch = info.releases[i];
 						continue;
 					}
 
@@ -298,22 +296,22 @@ class VnAssetsController {
 					var BestPartial  = BestPatch.type == "partial";
 					var BestTrial    = BestPatch.type == "trial";
 
-					var Released = info.tls[i].released != 99999999 && data.sender.IsReleased(info.tls[i].released);
-					var Complete = info.tls[i].type == "complete";
-					var Partial  = info.tls[i].type == "partial";
-					var Trial    = info.tls[i].type == "trial";
+					var Released = info.releases[i].released != 99999999 && data.sender.IsReleased(info.releases[i].released);
+					var Complete = info.releases[i].type == "complete";
+					var Partial  = info.releases[i].type == "partial";
+					var Trial    = info.releases[i].type == "trial";
 
 					if (Released && !BestReleased){
-						BestPatch = info.tls[i];
+						BestPatch = info.releases[i];
 						continue; 
 					}
 					if (Complete && !BestComplete){
-						BestPatch = info.tls[i];
+						BestPatch = info.releases[i];
 						continue; 
 					}
 					//To best precision we can check the release date here, but we just want know if has translation
 					if (Partial && !BestPartial && !BestComplete){
-						BestPatch = info.tls[i];
+						BestPatch = info.releases[i];
 						continue; 
 					}
 				}
