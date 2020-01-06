@@ -89,30 +89,28 @@ class Query {
 		await this.Invoke('var bnt = document.getElementsByTagName("button"); for (var i = 0; i < bnt.length; i++) if (bnt[i].className.indexOf("Button_primary") >= 0) { bnt[i].click(); break; } true;');
 		while (true) {		
 			await this.timeout(100);
-			var Result = await this.Invoke('var a = document.getElementsByTagName("a"); for (var i = 0; i < a.length; i++) if (a[i].className.indexOf("QueryResultHeader_iconLink") >= 0 && a[i].innerHTML.indexOf("json") >= 0) { a = a[i]; break; } a.href;');
-			if (Result == undefined)
+			var Response = await this.Invoke('(() => { var a = document.getElementsByTagName("a"); var b = undefined; for (var i = 0; i < a.length; i++) if (a[i].className.indexOf("QueryResultHeader_iconLink") >= 0 && a[i].innerHTML.indexOf("json") >= 0) { b = a[i]; break; } if (typeof(b) !== "object") return; var URL = b.href; if (typeof(URL) !== "string" || URL.length == 0) return; return Query.getUrl(URL);})();');
+			if (typeof(Response) != "string" || Response.length == 0)
 				continue;
-			Result = this.getJSON(Result);
-			console.log("Query Result:");
-			console.log(Result);
-			return Result;
+			return JSON.parse(Response);
 		}
     }
 
-	getJSON(url) {
-        var resp;
-        var xmlHttp;
-
-        resp  = '';
-        xmlHttp = new XMLHttpRequest();
-
-        if(xmlHttp != null) {
-            xmlHttp.open("GET", url, false);
-            xmlHttp.send(null);
-            resp = xmlHttp.responseText;
-        }
-
-        return JSON.parse(resp);
+	static getUrl(url, tries) {
+		try {
+    		var xmlHttp = new XMLHttpRequest();
+    		xmlHttp.open("GET", url, false);
+   			xmlHttp.send(null);
+			if (typeof(xmlHttp.responseText) !== "string" || xmlHttp.responseText.length == 0)
+				throw new Error("Invalid HTTP Response");
+			return xmlHttp.responseText;
+		} catch (ex){
+			if (typeof(tries) === "undefined" || tries === null)
+				return getUrl(url, 2);
+			if (tries >= 0)
+				return getUrl(url, tries - 1);
+			throw ex;
+		}
     }
 
 
