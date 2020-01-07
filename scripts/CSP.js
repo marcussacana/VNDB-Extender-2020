@@ -19,10 +19,6 @@ var filter = {
 chrome.webRequest.onHeadersReceived.addListener(onHeadersReceived, filter, ["blocking", "responseHeaders"]);
 
 var onBeforeRequested = function (details) {
-    if (details.initiator.indexOf("query.vndb.org") < 0)
-        return;
-    if (details.type != "xmlhttprequest")
-        return;
     if (details.url.indexOf("/query-result") < 0)
         return;
 
