@@ -13,7 +13,28 @@ var onHeadersReceived = function(details) {
 
 var filter = {
   urls: ["*://*.vndb.org/*", "*://vndb.org/*"],
-  types: ["main_frame", "sub_frame"]
+  types: ["main_frame", "sub_frame", "xmlhttprequest"]
 };
 
 chrome.webRequest.onHeadersReceived.addListener(onHeadersReceived, filter, ["blocking", "responseHeaders"]);
+
+var onBeforeRequested = function (details) {
+    if (details.initiator.indexOf("query.vndb.org") < 0)
+        return;
+    if (details.type != "xmlhttprequest")
+        return;
+    if (details.url.indexOf("/query-result") < 0)
+        return;
+
+    var Data = Decode(details.requestBody.raw[0].bytes);
+
+    var Controller = new StorageController();
+    Controller.set("QueryPostData", Data);
+}
+
+function Decode(Arr) {
+    let decoder = new TextDecoder(); 
+    return decoder.decode(Arr);
+}
+
+chrome.webRequest.onBeforeRequest.addListener(onBeforeRequested, filter, [ "blocking", "requestBody" ]);

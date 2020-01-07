@@ -52,7 +52,8 @@ class Query {
 			console.log("QueryHelper Instance Skiped: " + document.location.hostname);
 			return;
 		}
-
+		
+		this.storage = new StorageController(); 
 		this.mainBox = document.getElementsByClassName("mainbox")[1];
 		this.frame = document.createElement("iframe");
 		this.frame.hidden = true;
@@ -82,12 +83,19 @@ class Query {
 
     async Do(query) {
 		console.log("Query Request:\n" + query);
+		var rst = await this.direct(query);
+		if (rst !== undefined && rst.length > 0) {
+			var Result = JSON.parse(rst);
+			if (typeof(Result.queryResult) !== "undefined" && typeof(Result.queryResult.rows) == "object" && Result.queryResult.rows.length > 0){
+				return Result.queryResult.rows;
+			}
+		}
 		while (await this.Invoke('document.getElementsByTagName("select").length == 0 || document.getElementsByTagName("select")[0].value == ""'))
 			await this.timeout(50);
 
         await this.Invoke('ace.edit("query-ace-editor").setValue("'+query.replace("\"", "\\\"")+'"); true;');
 		await this.Invoke('var bnt = document.getElementsByTagName("button"); for (var i = 0; i < bnt.length; i++) if (bnt[i].className.indexOf("Button_primary") >= 0) { bnt[i].click(); break; } true;');
-		while (true) {		
+		while (true) {
 			await this.timeout(100);
 			var Response = await this.Invoke('(() => { var a = document.getElementsByTagName("a"); var b = undefined; for (var i = 0; i < a.length; i++) if (a[i].className.indexOf("QueryResultHeader_iconLink") >= 0 && a[i].innerHTML.indexOf("json") >= 0) { b = a[i]; break; } if (typeof(b) !== "object") return; var URL = b.href; if (typeof(URL) !== "string" || URL.length == 0) return; return Query.getUrl(URL);})();');
 			if (typeof(Response) != "string" || Response.length == 0)
@@ -98,12 +106,12 @@ class Query {
 
 	static getUrl(url, tries) {
 		try {
-    		var xmlHttp = new XMLHttpRequest();
-    		xmlHttp.open("GET", url, false);
-   			xmlHttp.send(null);
-			if (typeof(xmlHttp.responseText) !== "string" || xmlHttp.responseText.length == 0)
+    		var xhr = new XMLHttpRequest();
+    		xhr.open("GET", url, false);
+   			xhr.send(null);
+			if (typeof(xhr.responseText) !== "string" || xhr.responseText.length == 0)
 				throw new Error("Invalid HTTP Response");
-			return xmlHttp.responseText;
+			return xhr.responseText;
 		} catch (ex){
 			if (typeof(tries) === "undefined" || tries === null)
 				return getUrl(url, 2);
@@ -112,6 +120,35 @@ class Query {
 			throw ex;
 		}
     }
+
+	async direct(Query, tries) {
+		try {
+			var Data = await this.storage.getAsync("QueryPostData");
+			if (typeof(Data) !== "string" || Data.length == 0)
+				return undefined;
+
+			Data = JSON.parse(Data);
+			Data.queryName = "";
+			Data.queryText = Query;
+			Data = JSON.stringify(Data);
+
+			var xhr = new XMLHttpRequest();
+    		xhr.open("POST", "https://query.vndb.org/api/query-result", false);
+  			xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+   			xhr.send(Data);
+			if (typeof(xhr.responseText) !== "string" || xhr.responseText.length == 0)
+				throw new Error("Invalid HTTP Response");
+
+			return xhr.responseText;
+		} catch (ex) {
+			if (typeof(tries) === "undefined" || tries === null)
+				return await this.direct(Query, 2);
+			if (tries >= 0)
+				return await this.direct(Query, tries - 1);
+			return undefined;
+			
+		}
+	}
 
 
 	timeout(ms) {

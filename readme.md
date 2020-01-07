@@ -8,8 +8,7 @@ A updated version of the VNDB Extender
 - VNDB Query Mode: Now the VNDB Extender use the VNDB Query feature to catch the VN info
 
 ### Todo:
-- NSFW Cover Blur  
-- Better Query Mode communication (Maybe use the browser storage to exchange data?)
+- NSFW Cover Blur
 
 ### Usage from Source:
 1 - Download this git  
