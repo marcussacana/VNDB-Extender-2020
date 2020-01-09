@@ -41,8 +41,20 @@ class BuildController {
 		}
 		
 		let prefVisibilityLabel = document.createElement("P");
-		prefVisibilityLabel.appendChild(document.createTextNode("Always show VN info on covers"));
+		prefVisibilityLabel.appendChild(document.createTextNode("Always Show the VN Info"));
 		prefVisibilityLabel.className = "vnext-pref-label";
+		
+		let prefNSFWInput = document.createElement("INPUT");
+		prefNSFWInput.type = "checkbox";
+		prefNSFWInput.className = "vnext-pref-checkbox";
+		prefNSFWInput.id = "VNEXT-NsfwPref";
+		prefNSFWInput.onchange = function() {
+			callback("Nsfw", this.checked, callbackScope);
+		}
+		
+		let prefNsfwLabel = document.createElement("P");
+		prefNsfwLabel.appendChild(document.createTextNode("Show NSFW Covers"));
+		prefNsfwLabel.className = "vnext-pref-label";
 		
 		let prefTooltipInput = document.createElement("INPUT");
 		prefTooltipInput.type = "checkbox";
@@ -82,6 +94,8 @@ class BuildController {
 		
 		container.appendChild(prefVisibilityInput);
 		container.appendChild(prefVisibilityLabel);
+		container.appendChild(prefNSFWInput);
+		container.appendChild(prefNsfwLabel);
 		container.appendChild(prefTooltipInput);
 		container.appendChild(prefTooltipLabel);
 		container.appendChild(prefDetailsInput);
@@ -103,7 +117,7 @@ class BuildController {
 		box.id = "Vnext-" + id;
 		box.className = "vnext-entry";
 		
-		let customCover = document.createElement("DIV");
+		let customCover = document.createElement("IMG");
 		customCover.className = "custom-cover";
 		
 		let darken = document.createElement("DIV");
@@ -113,12 +127,19 @@ class BuildController {
 			if(tooltipElement != null) {
 				tooltipElement.className = tooltipElement.className.replace(" disappear", " appear");
 			}
+
+			let cover = document.getElementById("Vnext-" + id).getElementsByClassName("custom-cover")[0];
+			cover.classList.remove("nothover");
+			
 		};
 		darken.onmouseout = function() {
 			let tooltipElement = document.getElementById("Vnext-tooltip-" + id);
 			if(tooltipElement != null) {
 				tooltipElement.className = tooltipElement.className.replace(" appear", " disappear");
 			}
+
+			let cover = document.getElementById("Vnext-" + id).getElementsByClassName("custom-cover")[0];
+			cover.classList.add("nothover");
 		};
 		
 		let englishTitleLabel = document.createElement("P");
@@ -155,8 +176,9 @@ class BuildController {
 		darken.appendChild(japaneseTitleLabel);
 		darken.appendChild(bottom);
 		
-		customCover.appendChild(darken);
+		box.appendChild(darken);
 		box.appendChild(customCover);
+
 		hyperlink.appendChild(box);
 		
 		this.container.appendChild(hyperlink);
@@ -173,7 +195,7 @@ class BuildController {
 		box.id = "Vnext-" + id;
 		box.className = "vnext-entry";
 		
-		let customCover = document.createElement("DIV");
+		let customCover = document.createElement("IMG");
 		customCover.className = "custom-cover";
 		
 		let darken = document.createElement("DIV");
@@ -183,12 +205,19 @@ class BuildController {
 			if(tooltipElement != null) {
 				tooltipElement.className = tooltipElement.className.replace(" disappear", " appear");
 			}
+
+			let cover = document.getElementById("Vnext-" + id).getElementsByClassName("custom-cover")[0];
+			cover.classList.remove("nothover");
+			
 		};
 		darken.onmouseout = function() {
 			let tooltipElement = document.getElementById("Vnext-tooltip-" + id);
 			if(tooltipElement != null) {
 				tooltipElement.className = tooltipElement.className.replace(" appear", " disappear");
 			}
+
+			let cover = document.getElementById("Vnext-" + id).getElementsByClassName("custom-cover")[0];
+			cover.classList.add("nothover");
 		};
 		
 		let englishTitleLabel = document.createElement("P");
@@ -219,9 +248,10 @@ class BuildController {
 		darken.appendChild(englishTitleLabel);
 		darken.appendChild(japaneseTitleLabel);
 		darken.appendChild(bottom);
-		
-		customCover.appendChild(darken);
+	
+		box.appendChild(darken);
 		box.appendChild(customCover);
+
 		hyperlink.appendChild(box);
 		
 		this.container.appendChild(hyperlink);
@@ -238,6 +268,9 @@ class BuildController {
 		box.id = "Vnext-" + id;
 		box.className = "vnext-entry";
 		
+		let customCover = document.createElement("IMG");
+		customCover.className = "custom-cover";
+		
 		let darken = document.createElement("DIV");
 		darken.className = "vnext-darken";
 		darken.onmouseover = function() {
@@ -245,12 +278,19 @@ class BuildController {
 			if(tooltipElement != null) {
 				tooltipElement.className = tooltipElement.className.replace(" disappear", " appear");
 			}
+
+			let cover = document.getElementById("Vnext-" + id).getElementsByClassName("custom-cover")[0];
+			cover.classList.remove("nothover");
+			
 		};
 		darken.onmouseout = function() {
 			let tooltipElement = document.getElementById("Vnext-tooltip-" + id);
 			if(tooltipElement != null) {
 				tooltipElement.className = tooltipElement.className.replace(" appear", " disappear");
 			}
+
+			let cover = document.getElementById("Vnext-" + id).getElementsByClassName("custom-cover")[0];
+			cover.classList.add("nothover");
 		};
 		
 		let englishTitleLabel = document.createElement("P");
@@ -276,7 +316,10 @@ class BuildController {
 		darken.appendChild(bottom);
 		
 		box.appendChild(darken);
+		box.appendChild(customCover);
+
 		hyperlink.appendChild(box);
+
 		this.container.appendChild(hyperlink);
 	}
 	
@@ -291,6 +334,9 @@ class BuildController {
 		box.id = "Vnext-" + id;
 		box.className = "vnext-entry";
 		
+		let customCover = document.createElement("IMG");
+		customCover.className = "custom-cover";
+		
 		let darken = document.createElement("DIV");
 		darken.className = "vnext-darken";
 		darken.onmouseover = function() {
@@ -298,12 +344,19 @@ class BuildController {
 			if(tooltipElement != null) {
 				tooltipElement.className = tooltipElement.className.replace(" disappear", " appear");
 			}
+
+			let cover = document.getElementById("Vnext-" + id).getElementsByClassName("custom-cover")[0];
+			cover.classList.remove("nothover");
+			
 		};
 		darken.onmouseout = function() {
 			let tooltipElement = document.getElementById("Vnext-tooltip-" + id);
 			if(tooltipElement != null) {
 				tooltipElement.className = tooltipElement.className.replace(" appear", " disappear");
 			}
+
+			let cover = document.getElementById("Vnext-" + id).getElementsByClassName("custom-cover")[0];
+			cover.classList.add("nothover");
 		};
 		
 		let englishTitleLabel = document.createElement("P");
@@ -335,7 +388,10 @@ class BuildController {
 		darken.appendChild(bottom);
 		
 		box.appendChild(darken);
+		box.appendChild(customCover);
+
 		hyperlink.appendChild(box);
+
 		this.container.appendChild(hyperlink);
 	}
 	

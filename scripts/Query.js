@@ -48,10 +48,11 @@ if (document.location.hostname == "vndb.org") {//if is running in the vndb.org i
 
 class Query {
     constructor() {
-		Query.storage = new StorageController();
 
 		if (document.location.hostname != "vndb.org")
 			return;
+
+		Query.storage = new StorageController();
 		
 		this.CORSEnforced = null;
 		this.mainBox = document.getElementsByClassName("mainbox")[1];

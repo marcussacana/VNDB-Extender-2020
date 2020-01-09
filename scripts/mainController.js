@@ -85,6 +85,10 @@ class MainController {
 				scope.preferences.setDetails(value, scope.getPage());
 				location.reload();
 				break;
+			case "Nsfw":
+				scope.preferences.setNsfw(value);
+				location.reload();
+				break;
 			case "Disable":
 				scope.preferences.setDisable(value, scope.getPage());
 				location.reload();
@@ -106,10 +110,15 @@ class MainController {
 			document.querySelector("#VNEXT-TooltipPref").disabled = false;
 		}
 
+		if (this.preferences.getNsfw()) {
+			document.querySelector("#VNEXT-NsfwPref").checked = true;
+		}
+
 		if (this.preferences.getDisable(currentPage)) {			
 			document.querySelector("#VNEXT-TooltipPref").disabled = true;
 			document.querySelector("#VNEXT-VisibilityPref").disabled = true;
 			document.querySelector("#VNEXT-DetailsPref").disabled = true;
+			document.querySelector("#VNEXT-NsfwPref").disabled = true;
 			document.querySelector("#VNEXT-DisablePref").checked = true;
 
 			document.getElementsByClassName("mainbox")[1].getElementsByTagName("tbody")[0].setAttribute("style", "display: table-row-group;");
@@ -217,7 +226,7 @@ class MainController {
 			if(scope.isValidVNRow(entries[i])) {
 				// Gather all the data we need about the vn
 				let vn = {
-					englishTitle: entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].innerHTML,
+					englishTitle: entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].innerText,
 					japaneseTitle: entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].title,
 					status: entries[i].getElementsByClassName("tc_labels")[0].getElementsByTagName("a")[0].innerText,
 					releases: entries[i].getElementsByClassName("tc1")[0].innerHTML,
@@ -274,7 +283,7 @@ class MainController {
 			if(scope.isValidVNRow(entries[i])) {
 				// Gather all the data we need about the vn
 				let vn = {
-					englishTitle: entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].innerHTML,
+					englishTitle: entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].innerText,
 					vote: entries[i].getElementsByClassName("tc_vote")[0].getElementsByTagName("input")[0].value + "/10",
 					castDate: entries[i].getElementsByClassName("tc_voted")[0].innerHTML
 				};
@@ -324,10 +333,10 @@ class MainController {
 
 				// Gather all the data we need about the vn
 				let vn = {
-					englishTitle: Title[0].getElementsByTagName("a")[0].innerHTML,
+					englishTitle: Title[0].getElementsByTagName("a")[0].innerText,
 					japaneseTitle: Title[0].getElementsByTagName("a")[0].title,
 					rating: entries[i].getElementsByClassName("tc6")[0].innerText + "/10",
-					relDate: entries[i].getElementsByClassName("tc4")[0].innerHTML
+					relDate: entries[i].getElementsByClassName("tc4")[0].innerText
 				};
 				
 				// We get the VN id from the url the item links to
@@ -369,7 +378,7 @@ class MainController {
 
 				// Gather all the data we need about the vn
 				let vn = {
-					englishTitle: entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].innerHTML,
+					englishTitle: entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].innerText,
 					japaneseTitle: entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].title,
 					priority: Labels.substr(Labels.indexOf("Wishlist-") + 9).split(' ')[0].split(',')[0],
 					addedDate: entries[i].getElementsByClassName("tc_added")[0].innerHTML,
@@ -401,7 +410,12 @@ class MainController {
 			// Load the vn's assets
 			if(!skipDetails) {
 				scope.builder.buildEntryTooltip(vn.id, vn.comment);
-				scope.assets.loadAssets(vn.id, function(a){
+				scope.assets.loadAssets(vn.id, function(a) {
+					if (a.nsfw && scope.preferences.getNsfw() === false) {
+						var cover = document.getElementById("Vnext-" + vn.id).getElementsByClassName("custom-cover")[0];
+						cover.classList.add("nsfw");
+						cover.classList.add("nothover");
+					}
 					if (i == 0)
 						MainController.showCover(vn.id);
 					scope.processVNList(VNList, skipDetails, i + 1);
@@ -415,7 +429,7 @@ class MainController {
 		}
 	}
 
-	static showCover(id) {
+	static showCover(id, nsfw) {
 		var VN = document.getElementById("Vnext-" + id);
 		var IMG = VN.getAttribute("data-src");
 		if (IMG === null){
@@ -431,7 +445,8 @@ class MainController {
 		}
 		var Image = MainController.asyncImageLoader(IMG, id);
 		Image.then( img => {
-            VN.style.backgroundImage = "url('" + img.src + "')"
+			var cover = VN.getElementsByClassName("custom-cover")[0];
+			cover.src = img.src;
 			if (Next !== null)
 				setTimeout(() => { MainController.showCover(Next) }, 100);
 		}).catch ((error) => {
@@ -462,7 +477,10 @@ class MainController {
 	/// Returns a list of vn's from the default VNDB page.
 	/// --------------------------------------------------
 	getEntries() {
-		let stripes = document.getElementsByClassName("mainbox")[1].getElementsByTagName("table")[0];
+		var stripes = document.getElementsByClassName("mainbox");
+		if (stripes.length < 2)
+			return null;
+		stripes = stripes[1].getElementsByTagName("table")[0];
 		if(stripes == null) {
 			return null;
 		} else {

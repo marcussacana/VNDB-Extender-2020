@@ -6,9 +6,10 @@ A updated version of the VNDB Extender
 - Synchronous Loading: Help prevent the VNDB block by massive requests  
 - VN List Support: Now you can use the VNDB Extender in the main VNDB List  
 - VNDB Query Mode: Now the VNDB Extender use the VNDB Query feature to catch the VN info
+- NSFW Cover Blur: Now the VNDB Optionally blur the NSFW covers from the list
 
 ### Todo:
-- NSFW Cover Blur
+- Mozila Firefox Support
 
 ### Usage from Source:
 1 - Download this git  

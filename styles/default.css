@@ -24,6 +24,7 @@
 	float: left;
 	margin: 5px;
 	color: #FFF;
+	background-color: #FFF0;
 	background-size: cover;
 	background-repeat: no-repeat;
 	background-position: center;
@@ -39,6 +40,8 @@
 	opacity: 0;
 	animation-name: fade-out;
 	animation-duration: 0.2s;
+    position: relative;
+    z-index: 2;
 }
 
 .vnext-darken.always-visible {
@@ -53,8 +56,10 @@
 	animation-duration: 0.2s;
 }
 
-div.NSFW:not(:hover){
-    
+img.custom-cover.nsfw.nothover {
+	animation-name: fade-out;
+	animation-duration: 0.2s;
+	filter: blur(8px);
 }
 
 .vnext-darken.always-visible:hover {
@@ -218,9 +223,19 @@ div.NSFW:not(:hover){
 }
 
 .custom-cover {
+	width: 100%;
+	height: 100%;
 	background-repeat: no-repeat;
 	background-size: cover;
 	background-position: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.fil_div {
+    z-index: 10;
 }
 
 @keyframes fade-in {

@@ -113,6 +113,30 @@ class PreferencesController {
 	}
 	
 	/// ------------------------------------------------------------------
+	/// Returns the "Show NSFW Cover" preference value
+	/// ------------------------------------------------------------------
+	getNsfw() {
+		try {
+			return this.preferences["NSFW"];
+		} catch(ex) {
+			return false;
+		}
+	}
+	
+	/// ---------------------------------------------------------------
+	/// Sets the "load details" preference value, for a specified page.
+	/// ---------------------------------------------------------------
+	setNsfw(value) {
+		try {
+			this.preferences["NSFW"] = value;
+		} catch(ex) {
+			this.preferences["NSFW"] = value;
+		}
+		
+		this.savePreferences();
+	}
+	
+	/// ------------------------------------------------------------------
 	/// Returns the "disable extender" preference value, for a specified page.
 	/// ------------------------------------------------------------------
 	getDisable(page) {

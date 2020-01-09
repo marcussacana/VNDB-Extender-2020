@@ -177,6 +177,7 @@ class VnAssetsController {
 			try {
 				let coverURL = data.sender.getCoverURLFromPage(page);
 				data.sender.applyCoverURL(coverURL, data.id);
+				data.nsfw = page.indexOf("nsfw_pic") > 0;
 			} catch(ex) {
 				data.sender.applyCoverURL("", data.id);
 			}
@@ -232,6 +233,8 @@ class VnAssetsController {
 				
 				let coverURL = "https://s2.vndb.org/cv/"+info.image.toString().substr(-2)+"/"+info.image+".jpg";
 				data.sender.applyCoverURL(coverURL, data.id);
+
+				data.nsfw = info.img_nsfw;
 			} catch(ex) {
 				data.sender.applyCoverURL("", data.id);
 			}
