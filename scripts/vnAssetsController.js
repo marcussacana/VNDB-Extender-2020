@@ -83,16 +83,16 @@ class VnAssetsController {
 				data.cached = true;
 				this.parseInfo(page, data).then((x) => { if (callback != null) callback(data); });
 				AsyncMode = true;
-			} else if (Query.Loaded) {
-				Query.Helper.Do("select * from vn where vn.id = " + id).then((x) => {
+			} else if (Loaded) {
+				Helper.Do("select * from vn where vn.id = " + id).then((x) => {
 					this.onPageLoaded(x, data);
 				}); 
 			} else {
 				this.http.get("https://vndb.org/v" + id, this.onPageLoaded, data);
 			}
 		}, (err) => {
-			if (Query.Loaded) {
-				Query.Helper.Do("select * from vn where vn.id = " + id).then((x) => {
+			if (Loaded) {
+				Helper.Do("select * from vn where vn.id = " + id).then((x) => {
 					this.onPageLoaded(x, data);
 				}); 
 			} else 
@@ -133,7 +133,7 @@ class VnAssetsController {
 		} else {
 			if (!data.cached) {
 				VnAssetsController.Sleep(100)(data).then((data) => {
-					if (Query.Loaded && typeof(page) !== "string") {
+					if (Loaded && typeof(page) !== "string") {
 						data.sender.parseInfo(page[0], data).then((x) => { 
 							data.sender.storePage(data.id, x);
 							if (data.callback !== null) 
@@ -224,7 +224,7 @@ class VnAssetsController {
 	/// -----------------------------------------------------------------------
 	async parseInfo(info, data) {
 			if (typeof(info.releases) == "undefined")
-				info.releases = await Query.Helper.Do("select l.lang, r.type, name, released from (releases_lang as l join (select * from releases_producers) as rp on l.id = rp.id join (select * from producers) as p on rp.pid = p.id join (select * from releases) as r on l.id = r.id ) where r.id in (select id from releases_vn where vid = "+data.id+")");
+				info.releases = await Helper.Do("select l.lang, r.type, name, released from (releases_lang as l join (select * from releases_producers) as rp on l.id = rp.id join (select * from producers) as p on rp.pid = p.id join (select * from releases) as r on l.id = r.id ) where r.id in (select id from releases_vn where vid = "+data.id+")");
 
 			// Cover image
 			try {

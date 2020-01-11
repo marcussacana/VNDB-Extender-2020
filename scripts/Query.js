@@ -1,3 +1,11 @@
+let storage = null;
+let Loaded = false;
+let Response = null;
+let AsyncEnd = true;
+let Finished = false;
+let Helper = null;
+
+
 function IsAnon() {
 	var Elm = document.getElementById("root");
 	if (Elm != null && Elm.innerHTML.indexOf("Please log in") >= 0)
@@ -31,13 +39,13 @@ if (document.location.hostname == "vndb.org") {//if is running in the vndb.org i
 		var rst = eval(a.data);
 		if (typeof(rst) != "undefined"){
 			rst = escape(JSON.stringify(rst));
-		    window.top.postMessage("Query.Response = JSON.parse(unescape(\""+rst+"\")); Query.Finished = true;", "https://vndb.org");
+		    window.top.postMessage("Response = JSON.parse(unescape(\""+rst+"\")); Finished = true;", "https://vndb.org");
 		} else {
-		    window.top.postMessage("Query.Response = undefined; Query.Finished = true;", "https://vndb.org");
+		    window.top.postMessage("Response = undefined; Finished = true;", "https://vndb.org");
 		}
 	});
 	
-    window.addEventListener("load", function() { window.top.postMessage("Query.Loaded = true;", "https://vndb.org"); });
+    //window.addEventListener("load", function() { window.top.postMessage("Loaded = true;", "https://vndb.org"); });
 } else {//If the script is running in the query.vndb.org but in the extension context
 		if (!IsAnon()) {
 			var Script = document.createElement("script");
@@ -52,12 +60,16 @@ class Query {
 		if (document.location.hostname != "vndb.org")
 			return;
 
-		Query.storage = new StorageController();
+		storage = new StorageController();
 		
 		this.CORSEnforced = null;
 		this.mainBox = document.getElementsByClassName("mainbox")[1];
 		this.frame = document.createElement("iframe");
 		this.frame.hidden = true;
+		this.frame.onload = function() {
+			Loaded = true;
+		};
+
 		this.frame.src = "https://query.vndb.org/queries/new";
 		document.body.parentElement.insertBefore(this.frame, document.body.parentElement.firstElementChild);
 	}
@@ -68,16 +80,16 @@ class Query {
 
 	async Invoke(script) {
 
-		while (!Query.Loaded)
+		while (!Loaded)
 			await this.timeout(50);
 		
-		Query.Response = null;
-		Query.Finished = false;
+		Response = null;
+		Finished = false;
 		this.BeginInvoke(script);
-		while (!Query.Finished)
+		while (!Finished)
 			await this.timeout(10);
 
-		return Query.Response;
+		return Response;
 	}
 
     async Do(query) {
@@ -113,9 +125,9 @@ class Query {
 			return xhr.responseText;
 		} catch (ex){
 			if (typeof(tries) === "undefined" || tries === null)
-				return getUrl(url, 2);
+				return Query.getUrl(url, 2);
 			if (tries >= 0)
-				return getUrl(url, tries - 1);
+				return Query.getUrl(url, tries - 1);
 			throw ex;
 		}
     }
@@ -123,18 +135,18 @@ class Query {
 	static async direct(query, tries, QueryData) {
 		try {
 
-			if (document.location.hostname == "vndb.org" && Query.Helper.CORSEnforced){//Opera browser never trigger this
-				Query.AsyncEnd = false;
-				Query.Helper.BeginInvoke('Query.direct(unescape("'+escape(query)+'"), null, unescape("'+escape(await Query.storage.getAsync("QueryPostData"))+'")).then((x) => window.top.postMessage("Query.Response = JSON.stringify("+x+"); Query.AsyncEnd = true;", "https://vndb.org"));');
-				while (!Query.AsyncEnd)
-					await Query.Helper.timeout(10);
-				var RetData = Query.Response;
-				Query.Response = null;
+			if (document.location.hostname == "vndb.org" && Helper.CORSEnforced){//Opera browser never trigger this
+				AsyncEnd = false;
+				Helper.BeginInvoke('Query.direct(unescape("'+escape(query)+'"), null, unescape("'+escape(await storage.getAsync("QueryPostData"))+'")).then((x) => window.top.postMessage("Response = JSON.stringify("+x+"); AsyncEnd = true;", "https://vndb.org"));');
+				while (!AsyncEnd)
+					await Helper.timeout(10);
+				var RetData = Response;
+				Response = null;
 				return RetData;
 			}
 
 			if (QueryData == undefined){
-				QueryData = await Query.storage.getAsync("QueryPostData");
+				QueryData = await storage.getAsync("QueryPostData");
 				if (typeof(QueryData) !== "string" || QueryData.length == 0)
 					return undefined;
 			}
@@ -151,8 +163,8 @@ class Query {
 			if (typeof(xhr.responseText) !== "string" || xhr.responseText.length == 0)
 				throw new Error("Invalid HTTP Response");
 
-			if (Query.Helper != null && Query.Helper.CORSEnforced == null)
-				Query.Helper.CORSEnforced = false;
+			if (Helper != null && Helper.CORSEnforced == null)
+				Helper.CORSEnforced = false;
 
 			return xhr.responseText;
 		} catch (ex) {
@@ -161,13 +173,13 @@ class Query {
 			if (tries >= 0)
 				return await Query.direct(query, tries - 1, QueryData);
 
-			if (Query.Helper.CORSEnforced == null){
-				Query.Helper.CORSEnforced = true;
+			if (Helper.CORSEnforced == null){
+				Helper.CORSEnforced = true;
 				var Rst = await Query.direct(query, null, QueryData);
 				if (Rst !== undefined && Rst.length > 0){
 					return Rst;
 				}
-				Query.Helper.CORSEnforced = null;
+				Helper.CORSEnforced = null;
 			}
 
 			return undefined;
@@ -179,13 +191,6 @@ class Query {
 	timeout(ms) {
    	    return new Promise(resolve => setTimeout(resolve, ms));
 	}
-
-	static storage = null;
-	static Loaded = false;
-	static Response = null;
-	static AsyncEnd = true;
-	static Finished = false;
-	static Helper = null;
 }
 
-Query.Helper = new Query();
+Helper = new Query();

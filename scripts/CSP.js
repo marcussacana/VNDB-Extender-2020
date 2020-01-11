@@ -16,8 +16,6 @@ var filter = {
   types: ["main_frame", "sub_frame", "xmlhttprequest"]
 };
 
-chrome.webRequest.onHeadersReceived.addListener(onHeadersReceived, filter, ["blocking", "responseHeaders"]);
-
 var onBeforeRequested = function (details) {
     if (details.url.indexOf("/query-result") < 0)
         return;
@@ -33,4 +31,10 @@ function Decode(Arr) {
     return decoder.decode(Arr);
 }
 
-chrome.webRequest.onBeforeRequest.addListener(onBeforeRequested, filter, [ "blocking", "requestBody" ]);
+if (chrome) {
+    chrome.webRequest.onBeforeRequest.addListener(onBeforeRequested, filter, [ "blocking", "requestBody" ]);
+    chrome.webRequest.onHeadersReceived.addListener(onHeadersReceived, filter, ["blocking", "responseHeaders"]);
+} else {
+    browser.webRequest.onBeforeRequest.addListener(onBeforeRequested, filter, [ "blocking", "requestBody" ]);
+    browser.webRequest.onHeadersReceived.addListener(onHeadersReceived, filter, ["blocking", "responseHeaders"]);
+}

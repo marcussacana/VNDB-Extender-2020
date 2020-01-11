@@ -117,7 +117,10 @@ class PreferencesController {
 	/// ------------------------------------------------------------------
 	getNsfw() {
 		try {
-			return this.preferences["NSFW"];
+			var Val = this.preferences["NSFW"];
+			if (Val == undefined)
+				return false;
+			return Val;
 		} catch(ex) {
 			return false;
 		}
