@@ -165,6 +165,32 @@ class PreferencesController {
 		this.savePreferences();
 	}
 	
+	/// ------------------------------------------------------------------
+	/// Returns the "Async Cover" preference value, for a specified page.
+	/// ------------------------------------------------------------------
+	getAsync(page) {
+		try {
+			return this.preferences[page]["async"];
+		} catch(ex) {
+			return false;
+		}
+	}
+	
+	/// ---------------------------------------------------------------
+	/// Sets the "Async Cover" preference value, for a specified page.
+	/// ---------------------------------------------------------------
+	setAsync(value, page) {
+		try {
+			this.preferences[page]["async"] = value;
+		} catch(ex) {
+			this.preferences[page] = {
+				"async": value
+			};
+		}
+		
+		this.savePreferences();
+	}
+	
 	/// ------------------------------------------
 	/// Writes the current preferences to storage.
 	/// ------------------------------------------

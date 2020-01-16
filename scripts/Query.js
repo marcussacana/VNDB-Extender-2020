@@ -7,52 +7,54 @@ let Helper = null;
 
 
 function IsAnon() {
-	var Elm = document.getElementById("root");
-	if (Elm != null && Elm.innerHTML.indexOf("Please log in") >= 0)
-    	return true;
+    var Elm = document.getElementById("root");
+    if (Elm != null && Elm.innerHTML.indexOf("Please log in at") >= 0)
+        return true;
 
-	var Menus = document.getElementsByClassName("menubox");
-	var Anon = false;
-	for (var i = 0; i < Menus.length; i++)
-		if (Menus[i].innerHTML.indexOf("Password reset") >= 0){
-			Anon = true;
-		}
-	return Anon;
+    var Menus = document.getElementsByClassName("menubox");
+    var Anon = false;
+    for (var i = 0; i < Menus.length; i++)
+        if (Menus[i].innerHTML.indexOf("Password reset") >= 0) {
+            Anon = true;
+        }
+    return Anon;
 }
 
-if (document.location.hostname == "vndb.org") {//if is running in the vndb.org in the extension context
-		if (IsAnon()) {
-			var LoginAsked = sessionStorage.getItem("LoginAsked");
-			if (typeof(LoginAsked) == "undefined" || LoginAsked === null)
-				LoginAsked = false;
-			sessionStorage.setItem("LoginAsked", true);
-			var MSG = "The VNDB Extender works better if you sign into your account,\nIf you want login press OK.";
-			if (!LoginAsked && confirm(MSG)){
-				document.location = "https://vndb.org/u/login";
-			}
-		}
-	
-	window.addEventListener("message", function(a) { eval(a.data); });
+if (document.location.hostname == "vndb.org") { //if is running in the vndb.org in the extension context
+    if (IsAnon()) {
+        var LoginAsked = sessionStorage.getItem("LoginAsked");
+        if (typeof(LoginAsked) == "undefined" || LoginAsked === null)
+            LoginAsked = false;
+        sessionStorage.setItem("LoginAsked", true);
+        var MSG = "The VNDB Extender works better if you sign into your account,\nIf you want login press OK.";
+        if (!LoginAsked && confirm(MSG)) {
+            document.location = "https://vndb.org/u/login";
+        }
+    } else
+        window.addEventListener("message", function(a) {
+            eval(a.data);
+        });
 
-} else if (typeof(ace) != "undefined") {//If the script is running in the query.vndb.org in the page context
-	window.addEventListener("message", function(a) {
-		var rst = eval(a.data);
-		if (typeof(rst) != "undefined"){
-			rst = escape(JSON.stringify(rst));
-		    window.top.postMessage("Response = JSON.parse(unescape(\""+rst+"\")); Finished = true;", "https://vndb.org");
-		} else {
-		    window.top.postMessage("Response = undefined; Finished = true;", "https://vndb.org");
-		}
-	});
-	
+} else if (typeof(ace) != "undefined") { //If the script is running in the query.vndb.org in the page context
+    window.addEventListener("message", function(a) {
+        var rst = eval(a.data);
+        if (typeof(rst) != "undefined") {
+            rst = escape(JSON.stringify(rst));
+            window.top.postMessage("Response = JSON.parse(unescape(\"" + rst + "\")); Finished = true;", "https://vndb.org");
+        } else {
+            window.top.postMessage("Response = undefined; Finished = true;", "https://vndb.org");
+        }
+    });
+
     //window.addEventListener("load", function() { window.top.postMessage("Loaded = true;", "https://vndb.org"); });
-} else {//If the script is running in the query.vndb.org but in the extension context
-		if (!IsAnon()) {
-			var Script = document.createElement("script");
-			Script.src = chrome.extension.getURL("scripts/Query.js");
-			document.body.parentElement.insertBefore(Script, document.body.parentElement.firstElementChild);
-		}
+} else { //If the script is running in the query.vndb.org but in the extension context
+    if (!IsAnon()) {
+        var Script = document.createElement("script");
+        Script.src = chrome.extension.getURL("scripts/Query.js");
+        document.body.parentElement.insertBefore(Script, document.body.parentElement.firstElementChild);
+    }
 }
+
 
 class Query {
     constructor() {
@@ -66,9 +68,8 @@ class Query {
 		this.mainBox = document.getElementsByClassName("mainbox")[1];
 		this.frame = document.createElement("iframe");
 		this.frame.hidden = true;
-		this.frame.onload = function() {
-			Loaded = true;
-		};
+		if (!IsAnon())
+			this.frame.onload = function() { Loaded = true; };
 
 		this.frame.src = "https://query.vndb.org/queries/new";
 		document.body.parentElement.insertBefore(this.frame, document.body.parentElement.firstElementChild);

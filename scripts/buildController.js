@@ -77,7 +77,7 @@ class BuildController {
 		}
 		
 		let prefDetailsLabel = document.createElement("P");
-		prefDetailsLabel.appendChild(document.createTextNode("Don't load any additional information"));
+		prefDetailsLabel.appendChild(document.createTextNode("Skip Additional Info"));
 		prefDetailsLabel.className = "vnext-pref-label";
 		
 		let prefDisableInput = document.createElement("INPUT");
@@ -92,6 +92,18 @@ class BuildController {
 		prefDisableLabel.appendChild(document.createTextNode("Legacy View"));
 		prefDisableLabel.className = "vnext-pref-label";
 		
+		let prefAsyncInput = document.createElement("INPUT");
+		prefAsyncInput.type = "checkbox";
+		prefAsyncInput.className = "vnext-pref-checkbox";
+		prefAsyncInput.id = "VNEXT-AsyncPref";
+		prefAsyncInput.onchange = function() {
+			callback("Async", this.checked, callbackScope);
+		}
+
+		let prefAsyncLabel = document.createElement("P");
+		prefAsyncLabel.appendChild(document.createTextNode("Async Cover"));
+		prefAsyncLabel.className = "vnext-pref-label";
+		
 		container.appendChild(prefVisibilityInput);
 		container.appendChild(prefVisibilityLabel);
 		container.appendChild(prefNSFWInput);
@@ -100,6 +112,8 @@ class BuildController {
 		container.appendChild(prefTooltipLabel);
 		container.appendChild(prefDetailsInput);
 		container.appendChild(prefDetailsLabel);
+		container.appendChild(prefAsyncInput);
+		container.appendChild(prefAsyncLabel);
 		container.appendChild(prefDisableInput);
 		container.appendChild(prefDisableLabel);
 		
