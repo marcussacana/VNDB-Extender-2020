@@ -237,6 +237,10 @@ img.custom-cover.nsfw.nothover:not(.noblur){
     z-index: 10;
 }
 
+div#ds_box {
+    z-index: 10;
+}
+
 @keyframes fade-in {
 	0% { opacity: 0; }
 	100% { opacity: 1; }
