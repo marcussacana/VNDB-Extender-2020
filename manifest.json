@@ -45,7 +45,7 @@
       "96":"icons/icon-96.png"
    },
    "manifest_version":2,
-   "name":"VNDB Extender",
+   "name":"VNDB Extender 2020",
    "permissions":[ 
       "https://vndb.org/*",
       "https://query.vndb.org/*",
@@ -56,5 +56,5 @@
       "browsingData"
    ],
    "update_url":"https://clients2.google.com/service/update2/crx",
-   "version":"2.6"
+   "version":"2.7"
 }

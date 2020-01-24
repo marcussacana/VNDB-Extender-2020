@@ -31,28 +31,42 @@ class MainController {
                     let whichPage = scope.getPage();
 
                     if (scope.preferences.getDisable(whichPage)) {
-                        scope.builder.buildPreferences(scope.onPreferenceChanged, scope);
-                        scope.executePreferencesDynamic();
-                        scope.executePreferencesStaticVisually();
+                        scope.disableList(scope);
+                        return;
+                    }
+                    
+                    try {
+                        switch (whichPage) {
+                            default:
+                            case "vnlist":
+                            case "list":
+                                scope.runList(scope.preferences.getDetails(whichPage));
+                                break;
+                            case "votes":
+                                scope.runVotes(scope.preferences.getDetails(whichPage));
+                                break;
+                            case "wishlist":
+                            case "wish":
+                                scope.runWishlist(scope.preferences.getDetails(whichPage));
+                                break;
+                            case "browse":
+                                scope.runBrowse(scope.preferences.getDetails(whichPage));
+                                break;
+                        }
+                    } catch (err) {
+                        console.log("VNDB Extender Disabled - Restore the original columns settings");
+                        console.log(err);
+                        scope.disableList(scope);
                         return;
                     }
 
-                    switch (whichPage) {
-                        default:
-                        case "vnlist":
-                        case "list":
-                            scope.runList(scope.preferences.getDetails(whichPage));
-                            break;
-                        case "votes":
-                            scope.runVotes(scope.preferences.getDetails(whichPage));
-                            break;
-                        case "wishlist":
-                        case "wish":
-                            scope.runWishlist(scope.preferences.getDetails(whichPage));
-                            break;
-                        case "browse":
-                            scope.runBrowse(scope.preferences.getDetails(whichPage));
-                            break;
+                    if (typeof(colselect) != "undefined"){
+	                    colselect.onclick = function () { 
+                            if (this.warned)
+                                return;
+                            this.warned = true;
+                            alert("Currently the VNDB Extender don't support the list with custom column, if you want enable the extension again reset your changes later\nPS: This will be fixed soon, so be patient.");
+                        };
                     }
 
                     // Make sure the list looks good the way it does now
@@ -67,6 +81,13 @@ class MainController {
                 }
             }, 100);
         }
+    }
+
+    disableList(scope){    
+        scope.builder.buildPreferences(scope.onPreferenceChanged, scope);
+        scope.executePreferencesDynamic();
+        scope.executePreferencesStaticVisually();
+        document.getElementsByClassName("mainbox")[1].getElementsByTagName("table")[0].classList.add("show");
     }
 
     /// ------------------------------------------
@@ -221,7 +242,6 @@ class MainController {
         if (maintabs[1] != null) {
             maintabs[1].style.width = finalSize;
         }
-        document.getElementsByClassName("mainbox")[1].getElementsByTagName("table")[0].hidden = true;
     }
 
     /// --------------------------------------------------------
