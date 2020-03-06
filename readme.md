@@ -38,6 +38,11 @@ A updated version of the VNDB Extender
 5 - Select your Downloaded XPI  
 6 - Confirm the installation selecting "Add"  
 
+### Usage from Store (Edge Chromium):
+1 - Visit the store page [Clicking Here](https://microsoftedge.microsoft.com/addons/detail/gpjhodjfknjikogncjacjnkjcdhijanf)  
+2 - Click in the "Get" Button  
+3 - Confirm the Installation 
+
 #### Privacy:
 The VNDB Extender Query Mode will create a hidden iframe with the Query page of the VNDB,  
 and to exchange data bettwen the main VNDB page and the iframe he disable the CORS policy **only** in the VNDB.
