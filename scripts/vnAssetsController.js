@@ -231,7 +231,7 @@ class VnAssetsController {
 				if (info.image.toString() === "0")
 					throw new Error("Image Not Available");
 				
-				let coverURL = "https://s2.vndb.org/cv/"+info.image.toString().substr(-2)+"/"+info.image+".jpg";
+				let coverURL = "https://s2.vndb.org/cv/"+info.image.toString().substr(-3,2)+"/"+info.image.substr(4).slice(0,-1)+".jpg";
 				data.sender.applyCoverURL(coverURL, data.id);
 
 				data.nsfw = info.img_nsfw;
