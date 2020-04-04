@@ -40,14 +40,10 @@ class MainController {
                             default:
                             case "vnlist":
                             case "list":
-                                scope.runList(scope.preferences.getDetails(whichPage));
-                                break;
                             case "votes":
-                                scope.runVotes(scope.preferences.getDetails(whichPage));
-                                break;
                             case "wishlist":
                             case "wish":
-                                scope.runWishlist(scope.preferences.getDetails(whichPage));
+                                scope.runList(scope.preferences.getDetails(whichPage));
                                 break;
                             case "browse":
                                 scope.runBrowse(scope.preferences.getDetails(whichPage));
@@ -60,6 +56,7 @@ class MainController {
                         return;
                     }
 
+					/*
                     if (typeof(colselect) != "undefined"){
 	                    colselect.onclick = function () { 
                             if (this.warned)
@@ -68,7 +65,8 @@ class MainController {
                             alert("Currently the VNDB Extender don't support the list with custom column, if you want enable the extension again reset your changes later\nPS: This will be fixed soon, so be patient.");
                         };
                     }
-
+					*/
+					
                     // Make sure the list looks good the way it does now
                     scope.finalizeMainboxSize();
 
@@ -225,12 +223,18 @@ class MainController {
             itemCount = Math.floor((mainbox.offsetWidth - 10) / itemSize),
             actualItemCount = this.getItemCount(),
             finalSize = 0;
-
+		
         if (actualItemCount < itemCount) {
-            finalSize = (itemSize * actualItemCount) + 10;
+            finalSize = (itemSize * actualItemCount);
         } else {
-            finalSize = (itemSize * itemCount) + 10;
+            finalSize = (itemSize * itemCount);
         }
+		
+		//some resolutions this will prevent a big lost of free space in the list
+		if ((finalSize + itemSize) - (mainbox.offsetWidth - 10) < (itemSize/5))
+			finalSize += itemSize;
+	
+		finalSize += 10;
 
         if (finalSize < minSize) {
             finalSize = minSize;
@@ -269,15 +273,56 @@ class MainController {
         // Iterate through the current page's visual novels
         for (var i = 0; i < entries.length; i++) {
             if (scope.isValidVNRow(entries[i])) {
-                // Gather all the data we need about the vn
-                let vn = {
-                    englishTitle: entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].innerText,
-                    japaneseTitle: entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].title,
-                    status: entries[i].getElementsByClassName("tc_labels")[0].getElementsByTagName("a")[0].innerText,
-                    releases: entries[i].getElementsByClassName("tc1")[0].innerHTML,
-                    comment: null,
-                    wishstatus: false
-                };
+                // Gather all the data we need about the 
+				let vn = {};
+				
+				try {
+					vn.englishTitle = entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].innerText;
+				} catch { vn.englishTitle = null; }
+				
+				try {
+					vn.japaneseTitle = entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].title;
+				} catch { vn.japaneseTitle = null; }
+				
+				try {
+					 var labels = entries[i].getElementsByClassName("tc_labels")[0];
+					 labels.getElementsByTagName('i')[0].remove();
+					 vn.status = labels.getElementsByTagName("a")[0].innerText;
+				} catch { vn.status = null; }
+				
+				try {
+					vn.releases = entries[i].getElementsByClassName("tc1")[0].innerHTML;
+				} catch { vn.releases = null; }
+				
+				try {
+					vn.castDate = entries[i].getElementsByClassName("tc_voted")[0].innerText.split('-').join('/');
+					// On our own list, the cast date takes some more effort to cut out
+					if (vn.castDate.indexOf("<input") > -1) 
+						vn.castDate = vn.castDate.substring(vn.castDate.indexOf("\">") + 2, vn.castDate.length);					
+				} catch { vn.castDate = null; }
+				
+				try {
+					let vote = entries[i].getElementsByClassName("tc_vote")[0].getElementsByClassName("elm_dd")[0].getElementsByTagName("a")[0];
+					vote.getElementsByTagName("span")[0].remove();
+					vote = vote.innerText;
+					
+					if (vote.indexOf('\n') > 0)
+						vn.vote = vote.substr(0, vote.indexOf('\n'));
+					else
+						vn.vote = vote;
+					
+					vn.vote += "/10";
+				} catch { vn.vote = null; }
+				
+				try {
+					let rating = entries[i].getElementsByClassName("tc_rating")[0];
+					rating.getElementsByClassName("grayedout")[0].remove();
+					vn.rating = rating.innerText;
+				} catch { vn.rating = null; }
+                
+				vn.comment = null;
+				vn.wishstatus = false;
+                
 
                 // We get the VN id from the url the item links to
                 let urlParts = entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].href.split("/");
@@ -285,7 +330,7 @@ class MainController {
                 vn.id = vn.id.substring(1, vn.id.length);
 
                 // If someone has all releases of a VN, there will be another element that we need to go through
-                if (entries[i].getElementsByClassName("tc1")[0].getElementsByTagName("b").length > 0) {
+                if (vn.releases != null && entries[i].getElementsByClassName("tc1")[0].getElementsByTagName("b").length > 0) {
                     vn.releases = entries[i].getElementsByClassName("tc1")[0].getElementsByTagName("b")[0].innerHTML;
                 }
 
@@ -294,63 +339,13 @@ class MainController {
                     vn.comment = entries[i].getElementsByClassName("tc_title")[0].getElementsByClassName("grayedout")[0].innerHTML;
                 }
 
-                if (vn.status.indexOf("Wishlist-") >= 0) {
+                if (vn.status != null && vn.status.indexOf("Wishlist-") >= 0) {
                     vn.status = vn.status.substr(vn.status.indexOf("Wishlist-") + 9).split(' ')[0].split(',');
                     vn.wishstatus = true;
                 }
 
                 // Build the entry
-                scope.builder.buildEntryList(vn.id, vn.englishTitle, vn.japaneseTitle, vn.status, vn.releases, vn.rating, vn.comment, vn.wishstatus);
-
-                scope.VNList.push(vn);
-            }
-        }
-        scope.processVNList(scope.VNList, skipDetails, 0);
-    }
-
-    /// --------------------------------
-    /// Do our thing, on the votes page.
-    /// --------------------------------
-    runVotes(skipDetails) {
-        let entries = this.getEntries();
-
-        // If we got nothing, return
-        if (entries == null) {
-            return;
-        }
-
-        let scope = this;
-
-        scope.VNList = new Array();
-
-        // Iterate through the current page's visual novels
-        for (var i = 0; i < entries.length; i++) {
-            if (scope.isValidVNRow(entries[i])) {
-                // Gather all the data we need about the vn
-                let vn = {
-                    englishTitle: entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].innerText,
-                    vote: null,
-                    castDate: entries[i].getElementsByClassName("tc_voted")[0].innerHTML
-                };
-
-                let vote = entries[i].getElementsByClassName("elm_dd")[0].getElementsByTagName("a")[0].innerText;
-                if (vote.indexOf('\n') > 0)
-                    vn.vote = vote.substr(0, vote.indexOf('\n')) + "/10";
-                else
-                    vn.vote = vote + "/10";
-
-                // We get the VN id from the url the item links to
-                let urlParts = entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].href.split("/");
-                vn.id = urlParts[urlParts.length - 1];
-                vn.id = vn.id.substring(1, vn.id.length);
-
-                // On our own list, the cast date takes some more effort to cut out
-                if (vn.castDate.indexOf("<input") > -1) {
-                    vn.castDate = vn.castDate.substring(vn.castDate.indexOf("\">") + 2, vn.castDate.length);
-                }
-
-                // Build the entry
-                scope.builder.buildEntryVotes(vn.id, vn.englishTitle, vn.vote, vn.castDate);
+                scope.builder.buildEntryList(vn.id, vn.englishTitle, vn.japaneseTitle, vn.status, vn.releases, vn.rating, vn.comment, vn.wishstatus, vn.vote, vn.castDate);
 
                 scope.VNList.push(vn);
             }
@@ -404,51 +399,7 @@ class MainController {
         }
         scope.processVNList(scope.VNList, skipDetails, 0);
     }
-
-    /// -----------------------------------
-    /// Do our thing, on the wishlist page.
-    /// -----------------------------------
-    runWishlist(skipDetails) {
-        let entries = this.getEntries();
-
-        // If we got nothing, return
-        if (entries == null) {
-            return;
-        }
-
-        let scope = this;
-
-        scope.VNList = new Array();
-
-        // Iterate through the current page's visual novels
-        for (var i = 0; i < entries.length; i++) {
-            if (scope.isValidVNRow(entries[i])) {
-
-                entries[i].getElementsByClassName("tc_labels")[0].getElementsByTagName("a")[0].children[0].remove();
-                var Labels = entries[i].getElementsByClassName("tc_labels")[0].getElementsByTagName("a")[0].text;
-
-                // Gather all the data we need about the vn
-                let vn = {
-                    englishTitle: entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].innerText,
-                    japaneseTitle: entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].title,
-                    priority: Labels.substr(Labels.indexOf("Wishlist-") + 9).split(' ')[0].split(',')[0],
-                    addedDate: entries[i].getElementsByClassName("tc_added")[0].innerHTML,
-                };
-
-                // We get the VN id from the url the item links to
-                let urlParts = entries[i].getElementsByClassName("tc_title")[0].getElementsByTagName("a")[0].href.split("/");
-                vn.id = urlParts[urlParts.length - 1];
-                vn.id = vn.id.substring(1, vn.id.length);
-
-                // Build the entry
-                scope.builder.buildEntryWishlist(vn.id, vn.englishTitle, vn.japaneseTitle, vn.priority, vn.addedDate);
-
-                scope.VNList.push(vn);
-            }
-        }
-        scope.processVNList(scope.VNList, skipDetails, 0);
-    }
-
+  
     processVNList(VNList, skipDetails, begin) {
         let scope = this;
 

@@ -123,7 +123,7 @@ class BuildController {
 	/// ------------------------------------
 	/// Builds the list version of an entry.
 	/// ------------------------------------
-	buildEntryList(id, englishTitle, japaneseTitle, status, releases, rating, comment, wishstatus) {
+	buildEntryList(id, englishTitle, japaneseTitle, status, releases, rating, comment, wishstatus, vote, castDate) {
 		let hyperlink = document.createElement("A");
 		hyperlink.href = "/v" + id;
 		
@@ -156,6 +156,45 @@ class BuildController {
 			cover.classList.add("nothover");
 		};
 		
+		//My friend, we have very small space to use, it's better skip useless info
+		let TranslatedTitleAvaliable = englishTitle != null && japaneseTitle != null;
+		if (TranslatedTitleAvaliable && (englishTitle.toLowerCase() == japaneseTitle.toLowerCase() || japaneseTitle.length > 15 || vote != null))
+			japaneseTitle = null;
+		
+		let Lines = 0;		
+		
+		if (releases != null)
+			Lines++;
+		
+		if (status != null)
+			Lines++;
+		
+		 if (rating != null)
+			Lines++;		
+		
+		if (releases == "0/0" && Lines > 3){
+			releases = null;
+			Lines--;
+		}
+		
+		if (status == "-" && Lines > 3){
+			status = null;
+			Lines--;
+		}		
+		
+		if (vote == '-/10' && Lines > 3){
+			vote = null;
+			Lines--;
+		}
+		
+		if (rating != null && rating.endsWith(".00"))
+			rating = rating.split('.')[0];
+		
+		if (rating != null && vote == null){
+			vote = rating;
+			rating = null;
+		}
+		
 		let englishTitleLabel = document.createElement("P");
 		englishTitleLabel.className = "vnext-english-title";
 		englishTitleLabel.appendChild(document.createTextNode(englishTitle));
@@ -163,6 +202,15 @@ class BuildController {
 		let japaneseTitleLabel = document.createElement("P");
 		japaneseTitleLabel.className = "vnext-japanese-title";
 		japaneseTitleLabel.appendChild(document.createTextNode(japaneseTitle));
+		
+		let voteLabel = document.createElement("P");
+		voteLabel.className = "vnext-vote";
+		voteLabel.appendChild(document.createTextNode(vote));
+		
+		let castDateLabel = document.createElement("P");
+		castDateLabel.className = "vnext-cast-date";
+		castDateLabel.innerHTML = "<b>Cast date: </b>";
+		castDateLabel.appendChild(document.createTextNode(castDate));
 		
 		let bottom = document.createElement("DIV");
 		bottom.className = "vnext-bottom";
@@ -180,14 +228,32 @@ class BuildController {
 		let ratingLabel = document.createElement("P");
 		ratingLabel.className = "vnext-rating";
 		ratingLabel.innerHTML = "<b>Rating: </b>";
-//		ratingLabel.appendChild(document.createTextNode(rating));
+		ratingLabel.appendChild(document.createTextNode(rating));
 		
-		bottom.appendChild(statusLabel);
-		bottom.appendChild(releasesLabel);
-//		bottom.appendChild(ratingLabel);
+		if (status != null)
+			bottom.appendChild(statusLabel);
 		
-		darken.appendChild(englishTitleLabel);
-		darken.appendChild(japaneseTitleLabel);
+		if (releases != null)
+			bottom.appendChild(releasesLabel);
+		
+		if (rating != null)
+			bottom.appendChild(ratingLabel);
+		
+		if (castDate != null)
+			bottom.appendChild(castDateLabel);
+		
+		if (englishTitle != null)
+			darken.appendChild(englishTitleLabel);
+		
+		if (japaneseTitle != null)
+			darken.appendChild(japaneseTitleLabel);		
+		
+		if (englishTitle != null)
+			darken.appendChild(englishTitleLabel);
+		
+		if (vote != null)
+			darken.appendChild(voteLabel);
+		
 		darken.appendChild(bottom);
 		
 		box.appendChild(darken);
@@ -255,12 +321,18 @@ class BuildController {
 		relDateLabel.innerHTML = "<b>Released: </b>";
 		relDateLabel.appendChild(document.createTextNode(relDate));
 		
-		bottom.appendChild(relDateLabel);		
+		if (relDate != null)
+			bottom.appendChild(relDateLabel);		
 
-		bottom.appendChild(ratingLabel);
+		if (rating != null)
+			bottom.appendChild(ratingLabel);
 		
-		darken.appendChild(englishTitleLabel);
-		darken.appendChild(japaneseTitleLabel);
+		if (englishTitle != null)
+			darken.appendChild(englishTitleLabel);
+		
+		if (japaneseTitle != null)
+			darken.appendChild(japaneseTitleLabel);
+		
 		darken.appendChild(bottom);
 	
 		box.appendChild(darken);
@@ -268,144 +340,6 @@ class BuildController {
 
 		hyperlink.appendChild(box);
 		
-		this.container.appendChild(hyperlink);
-	}
-	
-	/// -------------------------------------
-	/// Builds the votes version of an entry.
-	/// -------------------------------------
-	buildEntryVotes(id, englishTitle, vote, castDate) {
-		let hyperlink = document.createElement("A");
-		hyperlink.href = "/v" + id;
-		
-		let box = document.createElement("DIV");
-		box.id = "Vnext-" + id;
-		box.className = "vnext-entry";
-		
-		let customCover = document.createElement("IMG");
-		customCover.className = "custom-cover";
-		
-		let darken = document.createElement("DIV");
-		darken.className = "vnext-darken";
-		darken.onmouseover = function() {
-			let tooltipElement = document.getElementById("Vnext-tooltip-" + id);
-			if(tooltipElement != null) {
-				tooltipElement.className = tooltipElement.className.replace(" disappear", " appear");
-			}
-
-			let cover = document.getElementById("Vnext-" + id).getElementsByClassName("custom-cover")[0];
-			cover.classList.remove("nothover");
-			
-		};
-		darken.onmouseout = function() {
-			let tooltipElement = document.getElementById("Vnext-tooltip-" + id);
-			if(tooltipElement != null) {
-				tooltipElement.className = tooltipElement.className.replace(" appear", " disappear");
-			}
-
-			let cover = document.getElementById("Vnext-" + id).getElementsByClassName("custom-cover")[0];
-			cover.classList.add("nothover");
-		};
-		
-		let englishTitleLabel = document.createElement("P");
-		englishTitleLabel.className = "vnext-english-title";
-		englishTitleLabel.appendChild(document.createTextNode(englishTitle));
-		
-		let voteLabel = document.createElement("P");
-		voteLabel.className = "vnext-vote";
-		voteLabel.appendChild(document.createTextNode(vote));
-		
-		let bottom = document.createElement("DIV");
-		bottom.className = "vnext-bottom smaller";
-		
-		let castDateLabel = document.createElement("P");
-		castDateLabel.className = "vnext-cast-date";
-		castDateLabel.innerHTML = "<b>Cast date: </b>";
-		castDateLabel.appendChild(document.createTextNode(castDate));
-		
-		bottom.appendChild(castDateLabel);
-		
-		darken.appendChild(englishTitleLabel);
-		darken.appendChild(voteLabel);
-		darken.appendChild(bottom);
-		
-		box.appendChild(darken);
-		box.appendChild(customCover);
-
-		hyperlink.appendChild(box);
-
-		this.container.appendChild(hyperlink);
-	}
-	
-	/// ----------------------------------------
-	/// Builds the wishlist version of an entry.
-	/// ----------------------------------------
-	buildEntryWishlist(id, englishTitle, japaneseTitle, priority, addedDate) {
-		let hyperlink = document.createElement("A");
-		hyperlink.href = "/v" + id;
-		
-		let box = document.createElement("DIV");
-		box.id = "Vnext-" + id;
-		box.className = "vnext-entry";
-		
-		let customCover = document.createElement("IMG");
-		customCover.className = "custom-cover";
-		
-		let darken = document.createElement("DIV");
-		darken.className = "vnext-darken";
-		darken.onmouseover = function() {
-			let tooltipElement = document.getElementById("Vnext-tooltip-" + id);
-			if(tooltipElement != null) {
-				tooltipElement.className = tooltipElement.className.replace(" disappear", " appear");
-			}
-
-			let cover = document.getElementById("Vnext-" + id).getElementsByClassName("custom-cover")[0];
-			cover.classList.remove("nothover");
-			
-		};
-		darken.onmouseout = function() {
-			let tooltipElement = document.getElementById("Vnext-tooltip-" + id);
-			if(tooltipElement != null) {
-				tooltipElement.className = tooltipElement.className.replace(" appear", " disappear");
-			}
-
-			let cover = document.getElementById("Vnext-" + id).getElementsByClassName("custom-cover")[0];
-			cover.classList.add("nothover");
-		};
-		
-		let englishTitleLabel = document.createElement("P");
-		englishTitleLabel.className = "vnext-english-title";
-		englishTitleLabel.appendChild(document.createTextNode(englishTitle));
-		
-		let japaneseTitleLabel = document.createElement("P");
-		japaneseTitleLabel.className = "vnext-japanese-title";
-		japaneseTitleLabel.appendChild(document.createTextNode(japaneseTitle));
-		
-		let bottom = document.createElement("DIV");
-		bottom.className = "vnext-bottom";
-		
-		let priorityLabel = document.createElement("P");
-		priorityLabel.className = "vnext-priority";
-		priorityLabel.innerHTML = "<b>Priority: </b>";
-		priorityLabel.appendChild(document.createTextNode(priority));
-		
-		let addedDateLabel = document.createElement("P");
-		addedDateLabel.className = "vnext-added-date";
-		addedDateLabel.innerHTML = "<b>Added: </b>";
-		addedDateLabel.appendChild(document.createTextNode(addedDate));
-		
-		bottom.appendChild(priorityLabel);
-		bottom.appendChild(addedDateLabel);
-		
-		darken.appendChild(englishTitleLabel);
-		darken.appendChild(japaneseTitleLabel);
-		darken.appendChild(bottom);
-		
-		box.appendChild(darken);
-		box.appendChild(customCover);
-
-		hyperlink.appendChild(box);
-
 		this.container.appendChild(hyperlink);
 	}
 	
