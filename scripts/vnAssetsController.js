@@ -231,13 +231,22 @@ class VnAssetsController {
 				if (info.image.toString() === "0")
 					throw new Error("Image Not Available");
 				//(cv,5804)
+				//cv28231
 				let coverID = info.image.toString();
 				let folder = 'cv';
 				if (coverID.startsWith("(") && coverID.endsWith(")")) {
 					folder = coverID.substr(1).split(',')[0];
 					coverID = coverID.split(',')[1];
 					coverID = coverID.substr(0, coverID.length-1);
-				}	
+				} 
+				let IsInvalidId = isNaN(parseInt(coverID));
+				if (IsInvalidId){
+					folder = "";
+					while (isNaN(parseInt(coverID))) {
+						folder += coverID.substr(0, 1);
+						coverID = coverID.substr(1);
+					}
+				}
 				let coverURL = "https://s2.vndb.org/"+folder+"/"+coverID.substr(-2)+"/"+coverID+".jpg";
 				data.sender.applyCoverURL(coverURL, data.id);
 
