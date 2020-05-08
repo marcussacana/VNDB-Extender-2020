@@ -19,6 +19,18 @@
 	display: none;
 }
 
+form.managelabels > .stripe thead {
+	display: table-header-group;
+}
+
+form.managelabels > .stripe tbody, form.managelabels > .stripe tfoot, form.managelabels > .stripe thead {
+    display: table-row-group;
+}
+
+form.managelabels > .stripe tfoot {
+	display: table-footer-group;
+}
+
 .vnext-entry {
 	position: relative;
 	float: left;
