@@ -73,6 +73,7 @@ class VnAssetsController {
 			cached: false
 		};
 		var AsyncMode = false;
+		var QueryBase = "select * from (vn as v join (select id as image, c_sexual_avg, c_sexual_stddev from images) as img on img.image = v.image) where v.id = ";
 		// Try to get it from storage first, else retrieve it.
 		this.storage.get("vnext-page-" + id, (page) => {
 			if(page != null && typeof page === "string" && page.length > 0) {
@@ -84,7 +85,7 @@ class VnAssetsController {
 				this.parseInfo(page, data).then((x) => { if (callback != null) callback(data); });
 				AsyncMode = true;
 			} else if (Loaded) {
-				Helper.Do("select * from vn where vn.id = " + id).then((x) => {
+				Helper.Do(QueryBase + id).then((x) => {
 					this.onPageLoaded(x, data);
 				}); 
 			} else {
@@ -92,7 +93,7 @@ class VnAssetsController {
 			}
 		}, (err) => {
 			if (Loaded) {
-				Helper.Do("select * from vn where vn.id = " + id).then((x) => {
+				Helper.Do(QueryBase + id).then((x) => {
 					this.onPageLoaded(x, data);
 				}); 
 			} else 
@@ -177,7 +178,7 @@ class VnAssetsController {
 			try {
 				let coverURL = data.sender.getCoverURLFromPage(page);
 				data.sender.applyCoverURL(coverURL, data.id);
-				data.nsfw = page.indexOf("nsfw_pic") > 0;
+				data.nsfw = page.indexOf("imghover--warning") > 0;
 			} catch(ex) {
 				data.sender.applyCoverURL("", data.id);
 			}
@@ -216,7 +217,7 @@ class VnAssetsController {
 		}
 	}
 
-/// -----------------------------------------------------------------------
+	/// -----------------------------------------------------------------------
 	/// Called when a VN page in HTML form is successfully retrieved.
 	/// These all have try catches around them because we're getting data from
 	/// an unpredictable page, we have to make sure the whole algorithm doesn't
@@ -250,7 +251,7 @@ class VnAssetsController {
 				let coverURL = "https://s2.vndb.org/"+folder+"/"+coverID.substr(-2)+"/"+coverID+".jpg";
 				data.sender.applyCoverURL(coverURL, data.id);
 
-				data.nsfw = info.img_nsfw;
+				data.nsfw = info.c_sexual_avg >= 1;
 			} catch(ex) {
 				data.sender.applyCoverURL("", data.id);
 			}
