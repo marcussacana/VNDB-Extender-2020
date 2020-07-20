@@ -1,6 +1,6 @@
 class StorageController {
     constructor() {
-
+		
     }
 
     get(key, callback) {
@@ -60,4 +60,17 @@ class StorageController {
             browser.storage.local.set(data);
         }
     }
+	
+	clear(){
+		
+        // Chrome version
+        if (chrome) {
+            chrome.storage.local.clear();
+        }
+
+        // Firefox version
+        else {
+            browser.storage.local.clear();
+        }
+	}
 }

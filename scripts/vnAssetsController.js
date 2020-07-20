@@ -73,7 +73,7 @@ class VnAssetsController {
 			cached: false
 		};
 		var AsyncMode = false;
-		var QueryBase = "select * from (vn as v join (select id as image, c_sexual_avg, c_sexual_stddev from images) as img on img.image = v.image) where v.id = ";
+		var QueryBase = "select * from (vn as v join ((select id as image, c_sexual_avg, c_sexual_stddev from images union all select null as image, 0 as c_sexual_avg, 0 as c_sexual_stddev) ) as img on img.image = v.image or img.image is null) where v.id = VNID LIMIT 1";
 		// Try to get it from storage first, else retrieve it.
 		this.storage.get("vnext-page-" + id, (page) => {
 			if(page != null && typeof page === "string" && page.length > 0) {
@@ -85,7 +85,7 @@ class VnAssetsController {
 				this.parseInfo(page, data).then((x) => { if (callback != null) callback(data); });
 				AsyncMode = true;
 			} else if (Loaded) {
-				Helper.Do(QueryBase + id).then((x) => {
+				Helper.Do(QueryBase.replace("VNID", id)).then((x) => {
 					this.onPageLoaded(x, data);
 				}); 
 			} else {
@@ -93,7 +93,7 @@ class VnAssetsController {
 			}
 		}, (err) => {
 			if (Loaded) {
-				Helper.Do(QueryBase + id).then((x) => {
+				Helper.Do(QueryBase.replace("VNID", id)).then((x) => {
 					this.onPageLoaded(x, data);
 				}); 
 			} else 
@@ -229,7 +229,7 @@ class VnAssetsController {
 
 			// Cover image
 			try {
-				if (info.image.toString() === "0")
+				if (info.image.toString() === "0" || info.image == null)
 					throw new Error("Image Not Available");
 				//(cv,5804)
 				//cv28231
