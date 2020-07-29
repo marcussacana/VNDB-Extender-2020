@@ -6,7 +6,7 @@ class MainController {
         this.preferences = new PreferencesController();
         this.assets = new VnAssetsController();
         this.builder = new BuildController();
-        this.AsyncCover = false;
+        this.AsyncCover = true;
     }
 
     /// -------------------------------
@@ -139,6 +139,11 @@ class MainController {
         }
 
         this.AsyncCover = this.preferences.getAsync(currentPage);
+		if (this.AsyncCover == null){
+			this.AsyncCover = true;
+			this.preferences.setAsync(this.AsyncCover, currentPage);
+		}
+		
         if (this.AsyncCover) {
             document.querySelector("#VNEXT-AsyncPref").checked = true;
         }
@@ -182,22 +187,8 @@ class MainController {
             }
             document.querySelector("#VNEXT-VisibilityPref").checked = false;
         }
-
-        // Disable tooltip
-        let tooltips = document.getElementsByClassName("vnext-tooltip");
-        if (this.preferences.getTooltip(currentPage)) {
-            for (var i = 0; i < tooltips.length; i++) {
-                if (!(tooltips[i].className.indexOf("disabled") > -1)) {
-                    tooltips[i].classList.add("disabled");
-                }
-            }
-            document.querySelector("#VNEXT-TooltipPref").checked = true;
-        } else {
-            for (var i = 0; i < tooltips.length; i++) {
-                tooltips[i].classList.remove("disabled");
-            }
-            document.querySelector("#VNEXT-TooltipPref").checked = false;
-        }
+		
+		this.refreshTooltipsVisibility();
 
         if (typeof(VNList) != "undefined") {
             let Nsfw = document.querySelector("#VNEXT-NsfwPref").checked;
@@ -212,6 +203,29 @@ class MainController {
             }
         }
     }
+	
+	refreshTooltipsVisibility() {
+        let currentPage = this.getPage();		
+        let tooltips = document.getElementsByClassName("vnext-tooltip");
+		
+		let tooltipPref = document.querySelector("#VNEXT-TooltipPref");
+		if (tooltipPref === null)
+			tooltipPref = [];
+		
+        if (this.preferences.getTooltip(currentPage)) {
+            for (var i = 0; i < tooltips.length; i++) {
+                if (!(tooltips[i].className.indexOf("disabled") > -1)) {
+                    tooltips[i].classList.add("disabled");
+                }
+            }
+            tooltipPref.checked = true;
+        } else {
+            for (var i = 0; i < tooltips.length; i++) {
+                tooltips[i].classList.remove("disabled");
+            }
+            tooltipPref.checked = false;
+        }
+	}
 
     /// -----------------------------------------------------------
     /// Sets the main box to a final size to wrap around the items.
@@ -428,6 +442,9 @@ class MainController {
 
                 if (next !== null)
                     document.getElementById("Vnext-" + vn.id).setAttribute("next", next.id);
+				
+				scope.refreshTooltipsVisibility();
+				
                 return;
             }
 

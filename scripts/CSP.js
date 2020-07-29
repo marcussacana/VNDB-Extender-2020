@@ -2,7 +2,7 @@ var onHeadersReceived = function(details) {
   for (var i = 0; i < details.responseHeaders.length; i++) {
     if ('content-security-policy' === details.responseHeaders[i].name.toLowerCase()) {
       details.responseHeaders[i].name = "Access-Control-Allow-Origin";
-      details.responseHeaders[i].value = 'http://vndb.com/';
+      details.responseHeaders[i].value = 'https://vndb.com/';
     }
   }
 

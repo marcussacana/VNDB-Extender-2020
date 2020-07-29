@@ -172,7 +172,7 @@ class PreferencesController {
 		try {
 			return this.preferences[page]["async"];
 		} catch(ex) {
-			return false;
+			return null;
 		}
 	}
 	

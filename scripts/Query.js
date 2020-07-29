@@ -132,6 +132,41 @@ class Query {
 			throw ex;
 		}
     }
+	
+	static XHR(method, url, data, headers) {
+		return new Promise(function (resolve, reject) {
+			let xhr = new XMLHttpRequest();
+			xhr.open(method, url);
+			
+			if (!(headers === undefined)){
+				for (var i = 0; i < headers.length; i++)
+					xhr.setRequestHeader(headers[i].name, headers[i].value);
+			}
+			
+			xhr.onload = function () {
+				if (this.status >= 200 && this.status < 300) {
+					resolve(xhr.response);
+				} else {
+					reject({
+						status: this.status,
+						statusText: xhr.statusText
+					});
+				}
+			};
+			
+			xhr.onerror = function () {
+				reject({
+					status: this.status,
+					statusText: xhr.statusText
+				});
+			};
+			
+			if (data === undefined)
+				xhr.send();
+			else
+				xhr.send(data);
+		});
+	}
 
 	static async direct(query, tries, QueryData) {
 		try {
@@ -157,17 +192,7 @@ class Query {
 			Data.queryText = query;
 			Data = JSON.stringify(Data);
 
-			var xhr = new XMLHttpRequest();
-    		xhr.open("POST", "https://query.vndb.org/api/query-result", false);
-  			xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-   			xhr.send(Data);
-			if (typeof(xhr.responseText) !== "string" || xhr.responseText.length == 0)
-				throw new Error("Invalid HTTP Response");
-
-			if (Helper != null && Helper.CORSEnforced == null)
-				Helper.CORSEnforced = false;
-
-			return xhr.responseText;
+			return await XHR("POST", "https://query.vndb.org/api/query-result", Data, [{ name: 'Content-Type', value: 'application/json; charset=UTF-8' }]);
 		} catch (ex) {
 			if (typeof(tries) === "undefined" || tries === null)
 				return await Query.direct(query, 2, QueryData);
