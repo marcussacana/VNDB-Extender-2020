@@ -1,3 +1,4 @@
+
 # VNDB Extender 2020
 A updated version of the VNDB Extender
 
@@ -5,7 +6,7 @@ A updated version of the VNDB Extender
 - Legacy View: Allow disable the VNDB Extender temporally  
 - Synchronous Loading: Help prevent the VNDB block by massive requests  
 - VN List Support: Now you can use the VNDB Extender in the main VNDB List  
-- VNDB Query Mode: Now the VNDB Extender use the VNDB Query feature to catch the VN info
+ ~~VNDB Query Mode: Now the VNDB Extender use the VNDB Query feature to catch the VN info~~ (Disabled For Maintence)
 - NSFW Cover Blur: Now the VNDB Optionally blur the NSFW covers from the list
 - Custom Columns: Now the VNDB Extender works with custom columns (WIP)
 
@@ -52,3 +53,4 @@ and to exchange data bettwen the main VNDB page and the iframe he disable the CO
 ![image](https://user-images.githubusercontent.com/10576957/71759552-8a132b80-2e8d-11ea-9c88-58e3200e3431.png)
 
 ###  Created by Evert Verschoor; Updated by marcussacana
+

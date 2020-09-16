@@ -7,6 +7,7 @@ let Helper = null;
 
 
 function IsAnon() {
+	return true;
     var Elm = document.getElementById("root");
     if (Elm != null && Elm.innerHTML.indexOf("Please log in at") >= 0)
         return true;
@@ -22,22 +23,25 @@ function IsAnon() {
 
 if (document.location.hostname == "vndb.org") { //if is running in the vndb.org in the extension context
     if (IsAnon()) {
-        var LoginAsked = sessionStorage.getItem("LoginAsked");
+        /*var LoginAsked = sessionStorage.getItem("LoginAsked");
         if (typeof(LoginAsked) == "undefined" || LoginAsked === null)
             LoginAsked = false;
         sessionStorage.setItem("LoginAsked", true);
         var MSG = "The VNDB Extender works better if you sign into your account,\nIf you want login press OK.";
         if (!LoginAsked && confirm(MSG)) {
             document.location = "https://vndb.org/u/login";
-        }
+        }*/
     } else
         window.addEventListener("message", function(a) {
             eval(a.data);
         });
 
 } else if (typeof(ace) != "undefined") { //If the script is running in the query.vndb.org in the page context
-    window.addEventListener("message", function(a) {
+    window.addEventListener("message", async function(a) {
         var rst = eval(a.data);
+	if (rst instanceof Promise){
+		rst = await eval(a.data);
+	}
         if (typeof(rst) != "undefined") {
             rst = escape(JSON.stringify(rst));
             window.top.postMessage("Response = JSON.parse(unescape(\"" + rst + "\")); Finished = true;", "https://vndb.org");
@@ -80,13 +84,14 @@ class Query {
 	}
 
 	async Invoke(script) {
-
+	
 		while (!Loaded)
 			await this.timeout(50);
 		
 		Response = null;
 		Finished = false;
 		this.BeginInvoke(script);
+
 		while (!Finished)
 			await this.timeout(10);
 
@@ -102,33 +107,41 @@ class Query {
 				return Result.queryResult.rows;
 			}
 		}
-		while (await this.Invoke('document.getElementsByTagName("select").length == 0 || document.getElementsByTagName("select")[0].value == ""'))
+		
+		//Wait Query Page Load
+		while (await this.Invoke('document.getElementsByTagName("li") == 0 || document.getElementById("query-ace-editor") == null'))
 			await this.timeout(50);
+		
+		var Waiting = 0;
 
         await this.Invoke('ace.edit("query-ace-editor").setValue(unescape("'+escape(query)+'")); true;');
 		await this.Invoke('var bnt = document.getElementsByTagName("button"); for (var i = 0; i < bnt.length; i++) if (bnt[i].className.indexOf("Button_primary") >= 0) { bnt[i].click(); break; } true;');
 		while (true) {
 			await this.timeout(100);
-			var Response = await this.Invoke('(() => { var a = document.getElementsByTagName("a"); var b = undefined; for (var i = 0; i < a.length; i++) if (a[i].className.indexOf("QueryResultHeader_iconLink") >= 0 && a[i].innerHTML.indexOf("json") >= 0) { b = a[i]; break; } if (typeof(b) !== "object") return; var URL = b.href; if (typeof(URL) !== "string" || URL.length == 0) return; return Query.getUrl(URL);})();');
+			Waiting += 100;
+			
+			if (Waiting > 5000)
+				return await this.Do(query);
+			
+			var Response = await this.Invoke('(async () => { var a = document.getElementsByTagName("a"); var b = undefined; for (var i = 0; i < a.length; i++) if (a[i].className.indexOf("QueryResultHeader_iconLink") >= 0 && a[i].innerHTML.indexOf("json") >= 0) { b = a[i]; break; } if (typeof(b) !== "object") return; var URL = b.href; if (typeof(URL) !== "string" || URL.length == 0) return; return await Query.getUrl(URL);})();');
 			if (typeof(Response) != "string" || Response.length == 0)
 				continue;
+			
 			return JSON.parse(Response);
 		}
     }
 
-	static getUrl(url, tries) {
+	static async getUrl(url, tries) {
 		try {
-    		var xhr = new XMLHttpRequest();
-    		xhr.open("GET", url, false);
-   			xhr.send(null);
-			if (typeof(xhr.responseText) !== "string" || xhr.responseText.length == 0)
+			var rsp = await Query.XHR("GET", url);
+			if (typeof(rsp) !== "string" || rsp.length == 0)
 				throw new Error("Invalid HTTP Response");
-			return xhr.responseText;
+			return rsp;
 		} catch (ex){
 			if (typeof(tries) === "undefined" || tries === null)
-				return Query.getUrl(url, 2);
+				return await Query.getUrl(url, 2);
 			if (tries >= 0)
-				return Query.getUrl(url, tries - 1);
+				return await Query.getUrl(url, tries - 1);
 			throw ex;
 		}
     }
@@ -171,7 +184,7 @@ class Query {
 	static async direct(query, tries, QueryData) {
 		try {
 
-			if (document.location.hostname == "vndb.org" && Helper.CORSEnforced){//Opera browser never trigger this
+			if (false){//document.location.hostname == "vndb.org" && Helper.CORSEnforced){//Opera browser never trigger this
 				AsyncEnd = false;
 				Helper.BeginInvoke('Query.direct(unescape("'+escape(query)+'"), null, unescape("'+escape(await storage.getAsync("QueryPostData"))+'")).then((x) => window.top.postMessage("Response = JSON.stringify("+x+"); AsyncEnd = true;", "https://vndb.org"));');
 				while (!AsyncEnd)
