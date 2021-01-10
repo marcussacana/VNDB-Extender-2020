@@ -25,7 +25,8 @@
             "*://vndb.org/u*/votes?c=*",
             "*://vndb.org/u*/wish?f=*",
             "*://vndb.org/u*/ulist?*",
-            "*://vndb.org/v/*"
+            "*://vndb.org/v", 
+            "*://vndb.org/v?*"
          ]
       }
    ],

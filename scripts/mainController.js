@@ -541,7 +541,7 @@ class MainController {
         if (lastPart.startsWith("ulist?")) {
             lastPart = lastPart.split('?')[1].split('=')[0]
         }
-        if (urlParts.length > 4 && urlParts[3] == "v") {
+        if (urlParts.length >= 4 && urlParts[3][0] == "v") {
             return "browse";
         }
         // We don't need any url parameters in it
