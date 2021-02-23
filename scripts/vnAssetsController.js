@@ -387,7 +387,7 @@ class VnAssetsController {
 		let elementWithImage = page.substring(page.indexOf("<div class=\"vnimg\">"), page.length);
 		if (elementWithImage.indexOf("No image uploaded yet") >= 0)
 			return "";
-		return elementWithImage.substring(elementWithImage.indexOf("<img src=\"") + 10, elementWithImage.indexOf("\" alt"));
+		return elementWithImage.substring(elementWithImage.indexOf("<img src=\"") + 10, elementWithImage.indexOf("\" width"));
 	}
 	
 	/// ----------------------------------------
