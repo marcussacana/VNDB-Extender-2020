@@ -386,8 +386,8 @@ class MainController {
         for (var i = 0; i < entries.length; i++) {
             if (scope.isValidVNRow(entries[i])) {
 
-                entries[i].getElementsByClassName("tc6")[0].getElementsByTagName("b")[0].remove();
-                var Title = entries[i].getElementsByClassName("tc1");
+                entries[i].getElementsByClassName("tc_rating")[0].getElementsByTagName("b")[0].remove();
+                var Title = entries[i].getElementsByClassName("tc_title");
                 if (Title.length == 0)
                     Title = entries[i].getElementsByClassName("tc_t");
 
@@ -395,8 +395,8 @@ class MainController {
                 let vn = {
                     englishTitle: Title[0].getElementsByTagName("a")[0].innerText,
                     japaneseTitle: Title[0].getElementsByTagName("a")[0].title,
-                    rating: entries[i].getElementsByClassName("tc6")[0].innerText + "/10",
-                    relDate: entries[i].getElementsByClassName("tc4")[0].innerText
+                    rating: entries[i].getElementsByClassName("tc_rating")[0].innerText + "/10",
+                    relDate: entries[i].getElementsByClassName("tc_rel")[0].innerText
                 };
 
                 // We get the VN id from the url the item links to
