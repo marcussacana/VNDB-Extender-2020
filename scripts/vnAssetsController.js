@@ -73,7 +73,7 @@ class VnAssetsController {
 			cached: false
 		};
 		var AsyncMode = false;
-		var QueryBase = "select * from (vn as v join ((select id as image, c_sexual_avg, c_sexual_stddev from images union all select null as image, 0 as c_sexual_avg, 0 as c_sexual_stddev) ) as img on img.image = v.image or img.image is null) where v.id = VNID LIMIT 1";
+		var QueryBase = "select * from (vn as v join ((select id as image, c_sexual_avg, c_sexual_stddev from images union all select null as image, 0 as c_sexual_avg, 0 as c_sexual_stddev) ) as img on img.image = v.image or img.image is null) where v.id = 'vVNID' LIMIT 1";
 		// Try to get it from storage first, else retrieve it.
 		this.storage.get("vnext-page-" + id, (page) => {
 			if(page != null && typeof page === "string" && page.length > 0) {
@@ -137,6 +137,7 @@ class VnAssetsController {
 					if (Loaded && typeof(page) !== "string") {
 						data.sender.parseInfo(page[0], data).then((x) => { 
 							data.sender.storePage(data.id, x);
+//							console.log(data.callback);
 							if (data.callback !== null) 
 								data.callback(data); 
 						});
@@ -225,7 +226,7 @@ class VnAssetsController {
 	/// -----------------------------------------------------------------------
 	async parseInfo(info, data) {
 			if (typeof(info.releases) == "undefined")
-				info.releases = await Helper.Do("select l.lang, r.type, name, released from (releases_lang as l join (select * from releases_producers) as rp on l.id = rp.id join (select * from producers) as p on rp.pid = p.id join (select * from releases) as r on l.id = r.id ) where r.id in (select id from releases_vn where vid = "+data.id+")");
+				info.releases = await Helper.Do("select l.lang, rv.rtype as type, name, released, l.mtl from (releases_lang as l join (select * from releases_producers) as rp on l.id = rp.id join (select * from producers) as p on rp.pid = p.id join (select * from releases) as r on l.id = r.id join (select * from releases_vn) as rv on r.id = rv.id) where r.id in (select id from releases_vn where vid = 'v"+data.id+"')");
 
 			// Cover image
 			try {
@@ -511,6 +512,9 @@ class VnAssetsController {
 	/// Applies the description to the correct entry on the page.
 	/// ---------------------------------------------------------
 	applyDescription(description, id) {
+		
+		if (description == null || description.trim().length == 0)
+			description = "Description unavailable.";
 
 		//Parse Query Method Description
 		while(description.indexOf("\n") >= 0)

@@ -104,6 +104,18 @@ class BuildController {
 		prefAsyncLabel.appendChild(document.createTextNode("Async Cover"));
 		prefAsyncLabel.className = "vnext-pref-label";
 		
+		let prefQueryInput = document.createElement("INPUT");
+		prefQueryInput.type = "checkbox";
+		prefQueryInput.className = "vnext-pref-checkbox";
+		prefQueryInput.id = "VNEXT-QueryPref";
+		prefQueryInput.onchange = function() {
+			callback("Query", this.checked, callbackScope);
+		}
+
+		let prefQueryLabel = document.createElement("P");
+		prefQueryLabel.appendChild(document.createTextNode("Query Mode"));
+		prefQueryLabel.className = "vnext-pref-label";
+		
 		container.appendChild(prefVisibilityInput);
 		container.appendChild(prefVisibilityLabel);
 		container.appendChild(prefNSFWInput);
@@ -114,6 +126,8 @@ class BuildController {
 		container.appendChild(prefDetailsLabel);
 		container.appendChild(prefAsyncInput);
 		container.appendChild(prefAsyncLabel);
+		container.appendChild(prefQueryInput);
+		container.appendChild(prefQueryLabel);
 		container.appendChild(prefDisableInput);
 		container.appendChild(prefDisableLabel);
 		

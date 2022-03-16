@@ -140,6 +140,61 @@ class PreferencesController {
 	}
 	
 	/// ------------------------------------------------------------------
+	/// Returns the "Query Mode" preference value
+	/// ------------------------------------------------------------------
+	getQueryMode(page) {
+		try {
+			var Val = this.preferences["QUERY"];
+			if (Val == undefined)
+				return false;
+			return Val;
+		} catch(ex) {
+			return false;
+		}
+	}
+
+	/// ---------------------------------------------------------------
+	/// Sets the "Query Mode" preference value
+	/// ---------------------------------------------------------------
+	setQueryMode(value) {
+		try {
+			this.preferences["QUERY"] = value;
+		} catch(ex) {
+			this.preferences["QUERY"] = value;
+		}
+		
+		this.savePreferences();
+	}
+	
+	
+	/// ------------------------------------------------------------------
+	/// Unimplemented
+	/// ------------------------------------------------------------------
+	getQueryConcurrency(page) {
+		try {
+			var Val = this.preferences["QueryConcurrency"];
+			if (Val == undefined)
+				return 3;
+			return Val;
+		} catch(ex) {
+			return 3;
+		}
+	}
+
+	/// ---------------------------------------------------------------
+	/// Unimplemented
+	/// ---------------------------------------------------------------
+	setQueryConcurrency(value) {
+		try {
+			this.preferences["QueryConcurrency"] = value;
+		} catch(ex) {
+			this.preferences["QueryConcurrency"] = value;
+		}
+		
+		this.savePreferences();
+	}
+	
+	/// ------------------------------------------------------------------
 	/// Returns the "disable extender" preference value, for a specified page.
 	/// ------------------------------------------------------------------
 	getDisable(page) {

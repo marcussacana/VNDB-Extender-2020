@@ -34,7 +34,7 @@ class MainController {
                         scope.disableList(scope);
                         return;
                     }
-                    
+			
                     try {
                         switch (whichPage) {
                             default:
@@ -117,6 +117,10 @@ class MainController {
                 scope.preferences.setAsync(value, scope.getPage());
                 location.reload();
                 break;
+            case "Query":
+                scope.preferences.setQueryMode(value);
+                location.reload();
+                break;
         }
     }
 
@@ -136,6 +140,10 @@ class MainController {
 
         if (this.preferences.getNsfw()) {
             document.querySelector("#VNEXT-NsfwPref").checked = true;
+        }		
+		
+        if (this.preferences.getQueryMode()) {
+            document.querySelector("#VNEXT-QueryPref").checked = true;
         }
 
         this.AsyncCover = this.preferences.getAsync(currentPage);
@@ -154,6 +162,7 @@ class MainController {
             document.querySelector("#VNEXT-DetailsPref").disabled = true;
             document.querySelector("#VNEXT-NsfwPref").disabled = true;
             document.querySelector("#VNEXT-AsyncPref").disabled = true;
+            document.querySelector("#VNEXT-QueryPref").disabled = true;
             document.querySelector("#VNEXT-DisablePref").checked = true;
 
             document.getElementsByClassName("mainbox")[1].getElementsByTagName("tbody")[0].setAttribute("style", "display: table-row-group;");
@@ -255,10 +264,10 @@ class MainController {
         }
 
         mainbox.style.width = finalSize + "px";
-
+		
         let maintabs = document.getElementsByClassName("maintabs");
-        if (maintabs[1] != null) {
-            maintabs[1].style.width = finalSize;
+        for (var i = 0; i < maintabs.length; i++) {
+            maintabs[i].style.width = finalSize+ "px";
         }
     }
 
@@ -273,6 +282,7 @@ class MainController {
     /// Do our thing, on the list page.
     /// -------------------------------
     runList(skipDetails) {
+
         let entries = this.getEntries();
 
         // If we got nothing, return
@@ -364,7 +374,13 @@ class MainController {
                 scope.VNList.push(vn);
             }
         }
-        scope.processVNList(scope.VNList, skipDetails, 0);
+		
+		
+		if (scope.preferences.getQueryMode() && scope.preferences.getAsync(scope.getPage())) {
+			scope.processVNListMulti(scope.VNList, skipDetails, scope.preferences.getQueryConcurrency());
+		} else {
+			scope.processVNList(scope.VNList, skipDetails);
+		}
     }
 
     /// --------------------------------
@@ -411,17 +427,29 @@ class MainController {
                 scope.VNList.push(vn);
             }
         }
-        scope.processVNList(scope.VNList, skipDetails, 0);
+		
+		if (scope.preferences.getQueryMode() && scope.preferences.getAsync(scope.getPage())) {
+			scope.processVNListMulti(scope.VNList, skipDetails, scope.preferences.getQueryConcurrency());
+		} else {
+			scope.processVNList(scope.VNList, skipDetails);
+		}
     }
+	
+	processVNListMulti(VNList, skipDetails, concurrency){
+        let scope = this;
+		for (var i = 0; i < concurrency; i++){
+			scope.processVNList(scope.VNList, skipDetails, i, i, concurrency);
+		}
+	}
   
-    processVNList(VNList, skipDetails, begin) {
+    processVNList(VNList, skipDetails, begin = 0, taskBegin = 0, adv = 1) {
         let scope = this;
 
-        for (let i = begin; i < VNList.length; i++) {
+        for (let i = begin; i < VNList.length; i += adv) {
             let vn = VNList[i];
             var next = null;
-            if (i + 1 < VNList.length)
-                next = VNList[i + 1];
+            if (i + adv < VNList.length)
+                next = VNList[i + adv];
 
             // Load the vn's assets
             if (!skipDetails) {
@@ -435,9 +463,11 @@ class MainController {
                         if (scope.preferences.getNsfw())
                             cover.classList.add("noblur");
                     }
-                    if (i == 0)
-                        MainController.showCover(vn.id, scope.AsyncCover);
-                    scope.processVNList(VNList, skipDetails, i + 1);
+					
+                    if (i == taskBegin)
+                        MainController.showCover(vn.id, scope.preferences.getAsync(scope.getPage()));
+					
+                    scope.processVNList(VNList, skipDetails, i + adv, taskBegin, adv);//The for don't contine because of the return
                 });
 
                 if (next !== null)
@@ -453,14 +483,16 @@ class MainController {
 
     static showCover(id, Async) {
         var VN = document.getElementById("Vnext-" + id);
-        var IMG = VN.getAttribute("data-src");
+        
+		var IMG = VN.getAttribute("data-src");
         if (IMG === null) {
             setTimeout(() => {
                 MainController.showCover(id, Async)
             }, 100);
             return;
         }
-        var Next = VN.getAttribute("next");
+        
+		var Next = VN.getAttribute("next");
         if (IMG === "") {
             var Darken = VN.getElementsByClassName("vnext-darken")[0];
             Darken.classList.add("always-visible");
@@ -469,6 +501,7 @@ class MainController {
             }, 100);
             return;
         }
+		
         if (Async === true) {
             var cover = VN.getElementsByClassName("custom-cover")[0];
             cover.src = IMG;

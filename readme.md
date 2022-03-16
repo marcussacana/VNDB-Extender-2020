@@ -1,5 +1,4 @@
-# Help-me keep actively creating tools!
-### Read more about this in my Ko-fi goal:
+## My Ko-fi:
 <a href='https://ko-fi.com/Z8Z231I4Z' target='_blank'><img height='40' style='border:0px;height:40px;' src='https://cdn.ko-fi.com/cdn/kofi1.png?v=2' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 # VNDB Extender 2020
@@ -9,7 +8,7 @@ A updated version of the VNDB Extender
 - Legacy View: Allow disable the VNDB Extender temporally  
 - Synchronous Loading: Help prevent the VNDB block by massive requests  
 - VN List Support: Now you can use the VNDB Extender in the main VNDB List  
- ~~VNDB Query Mode: Now the VNDB Extender use the VNDB Query feature to catch the VN info~~ (Disabled For Maintence)
+- VNDB Query Mode: Alternative mode if you had Too Many Requests Problem
 - NSFW Cover Blur: Now the VNDB Optionally blur the NSFW covers from the list
 - Custom Columns: Now the VNDB Extender works with custom columns (WIP)
 

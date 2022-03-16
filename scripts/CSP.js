@@ -1,11 +1,15 @@
 var onHeadersReceived = function(details) {
   for (var i = 0; i < details.responseHeaders.length; i++) {
     if ('content-security-policy' === details.responseHeaders[i].name.toLowerCase()) {
-      details.responseHeaders[i].name = "Access-Control-Allow-Origin";
-      details.responseHeaders[i].value = 'https://vndb.com/';
+      var val = details.responseHeaders[i].value;
+	  val = val.replace("frame-ancestors 'none'", "frame-ancestors 'self' https://*.vndb.org https://vndb.org");
+	  details.responseHeaders[i].value = val;
     }
   }
-
+  
+  details.responseHeaders.push({name: 'Access-Control-Allow-Origin', value: 'https://vndb.org'});
+  details.responseHeaders.push({name: 'Access-Control-Allow-Headers', value: 'Content-Type'});
+  
   return {
     responseHeaders: details.responseHeaders
   };
@@ -16,15 +20,6 @@ var filter = {
   types: ["main_frame", "sub_frame", "xmlhttprequest"]
 };
 
-var onBeforeRequested = function (details) {
-    if (details.url.indexOf("/query-result") < 0)
-        return;
-
-    var Data = Decode(details.requestBody.raw[0].bytes);
-
-    var Controller = new StorageController();
-    Controller.set("QueryPostData", Data);
-}
 
 function Decode(Arr) {
     let decoder = new TextDecoder(); 
@@ -32,9 +27,7 @@ function Decode(Arr) {
 }
 
 if (chrome) {
-    chrome.webRequest.onBeforeRequest.addListener(onBeforeRequested, filter, [ "blocking", "requestBody" ]);
     chrome.webRequest.onHeadersReceived.addListener(onHeadersReceived, filter, ["blocking", "responseHeaders"]);
 } else {
-    browser.webRequest.onBeforeRequest.addListener(onBeforeRequested, filter, [ "blocking", "requestBody" ]);
     browser.webRequest.onHeadersReceived.addListener(onHeadersReceived, filter, ["blocking", "responseHeaders"]);
 }
