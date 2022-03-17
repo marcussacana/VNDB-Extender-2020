@@ -5,9 +5,10 @@
          "css":[ 
             "styles/default.css"
          ],
-         "js":[ 
-            "scripts/httpController.js",
+         "js":[
             "scripts/storageController.js",
+            "scripts/Query.js",
+            "scripts/httpController.js",
             "scripts/preferencesController.js",
             "scripts/vnAssetsController.js",
             "scripts/buildController.js",

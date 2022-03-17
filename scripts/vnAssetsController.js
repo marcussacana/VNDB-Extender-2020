@@ -84,7 +84,7 @@ class VnAssetsController {
 				data.cached = true;
 				this.parseInfo(page, data).then((x) => { if (callback != null) callback(data); });
 				AsyncMode = true;
-			} else if (Loaded) {
+			} else if (Query.Loaded) {
 				Helper.Do(QueryBase.replace("VNID", id)).then((x) => {
 					this.onPageLoaded(x, data);
 				}); 
@@ -92,7 +92,7 @@ class VnAssetsController {
 				this.http.get("https://vndb.org/v" + id, this.onPageLoaded, data);
 			}
 		}, (err) => {
-			if (Loaded) {
+			if (Query.Loaded) {
 				Helper.Do(QueryBase.replace("VNID", id)).then((x) => {
 					this.onPageLoaded(x, data);
 				}); 
@@ -134,7 +134,7 @@ class VnAssetsController {
 		} else {
 			if (!data.cached) {
 				VnAssetsController.Sleep(100)(data).then((data) => {
-					if (Loaded && typeof(page) !== "string") {
+					if (Query.Loaded && typeof(page) !== "string") {
 						data.sender.parseInfo(page[0], data).then((x) => { 
 							data.sender.storePage(data.id, x);
 							
@@ -593,6 +593,3 @@ class VnAssetsController {
 		return tmp.value;
 	}
 }
-
-if (typeof(Loaded) == 'undefined')
-	Loaded = false;

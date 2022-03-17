@@ -17,7 +17,7 @@
 		  {
 			"header": "content-security-policy",
 			"operation": "set",
-			"value": "default-src 'none'; connect-src 'self'; img-src *; script-src https://*.vndb.org unsafe-eval; style-src 'unsafe-inline' https://*.vndb.org; form-action 'self'; frame-ancestors 'self' https://*.vndb.org https://vndb.org"
+			"value": "default-src 'none'; connect-src 'self'; img-src *; script-src 'self' https://*.vndb.org https://vndb.org 'unsafe-eval'; style-src 'unsafe-inline' https://*.vndb.org; form-action 'self'; frame-ancestors 'self' https://*.vndb.org https://vndb.org"
 		  }
 	  ]
 	},
