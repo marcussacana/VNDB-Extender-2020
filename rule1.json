@@ -1,0 +1,28 @@
+[{
+  "id" : 1,
+  "priority": 1,
+  "action" : {
+  "type": "modifyHeaders",
+	  "responseHeaders": [
+		  {
+			"header": "Access-Control-Allow-Origin",
+			"operation": "set",
+			"value": "https://vndb.org"
+		  },
+		  {
+			"header": "Access-Control-Allow-Headers",
+			"operation": "append",
+			"value": "Content-Type"
+		  },
+		  {
+			"header": "content-security-policy",
+			"operation": "set",
+			"value": "default-src 'none'; connect-src 'self'; img-src *; script-src https://*.vndb.org unsafe-eval; style-src 'unsafe-inline' https://*.vndb.org; form-action 'self'; frame-ancestors 'self' https://*.vndb.org https://vndb.org"
+		  }
+	  ]
+	},
+  "condition" : {
+    "domains" : ["vndb.org", "query.vndb.org"],
+    "resourceTypes" : ["main_frame", "sub_frame", "script", "xmlhttprequest"]
+  }
+}]

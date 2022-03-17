@@ -137,8 +137,8 @@ class VnAssetsController {
 					if (Loaded && typeof(page) !== "string") {
 						data.sender.parseInfo(page[0], data).then((x) => { 
 							data.sender.storePage(data.id, x);
-//							console.log(data.callback);
-							if (data.callback !== null) 
+							
+							if (data.callback !== null && typeof(data.callback) != 'undefined')
 								data.callback(data); 
 						});
 						return;

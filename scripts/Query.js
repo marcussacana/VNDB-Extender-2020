@@ -30,7 +30,7 @@ if (document.location.hostname == "vndb.org") { //if is running in the vndb.org 
 } else { //If the script is running in the query.vndb.org but in the extension context
     if (!IsAnon()) {
         var Script = document.createElement("script");
-        Script.src = chrome.extension.getURL("scripts/Query.js");
+        Script.src = chrome.runtime.getURL("scripts/Query.js");
         document.body.parentElement.insertBefore(Script, document.body.parentElement.firstElementChild);
     }
 }
