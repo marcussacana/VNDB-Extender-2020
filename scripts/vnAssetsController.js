@@ -146,7 +146,7 @@ class VnAssetsController {
 					data.sender.parsePage(page, data);
 					data.sender.storePage(data.id, page);
 
-					if (data.callback !== null)
+					if (data.callback !== null && typeof(data.callback) != 'undefined')
 						data.callback(data);
 				});
 			}
@@ -593,3 +593,6 @@ class VnAssetsController {
 		return tmp.value;
 	}
 }
+
+if (typeof(Loaded) == 'undefined')
+	Loaded = false;

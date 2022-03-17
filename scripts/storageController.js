@@ -62,24 +62,14 @@ class StorageController {
     }
 }
 
-var ResetData = function(){
-	if (confirm("Do you wanna reset the VNDB Extender cache?")){
-        // Chrome version
-        if (chrome) {
-            chrome.storage.local.clear();
-        }
-        // Firefox version
-        else {
-            browser.storage.local.clear();
-        }
-	}
-};
-
 var brw = null;
 if (chrome)
 	brw = chrome;
 else
 	brw = browser;
 
-if (typeof(brw.browserAction) != "undefined")
-	brw.browserAction.onClicked.addListener(ResetData);
+if (typeof(brw.action) != "undefined")
+	brw.action.onClicked.addListener(tab => {
+		brw.storage.local.clear();
+		console.log("VNDB Extender Cache Flush");
+	});
