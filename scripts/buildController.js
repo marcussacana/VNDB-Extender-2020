@@ -186,7 +186,7 @@ class BuildController {
 		 if (rating != null)
 			Lines++;		
 		
-		if (releases == "0/0" && Lines > 3){
+		if (releases.trim() == "0/0" && Lines > 3){
 			releases = null;
 			Lines--;
 		}

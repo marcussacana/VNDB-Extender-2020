@@ -146,10 +146,10 @@ class PreferencesController {
 		try {
 			var Val = this.preferences["QUERY"];
 			if (Val == undefined)
-				return false;
+				return true;
 			return Val;
 		} catch(ex) {
-			return false;
+			return true;
 		}
 	}
 
