@@ -5,10 +5,10 @@
          "css":[ 
             "styles/default.css"
          ],
-         "js":[ 
-            "scripts/httpController.js",
+         "js":[
             "scripts/storageController.js",
             "scripts/Query.js",
+            "scripts/httpController.js",
             "scripts/preferencesController.js",
             "scripts/vnAssetsController.js",
             "scripts/buildController.js",
@@ -30,15 +30,16 @@
          ]
       }
    ],
-   "web_accessible_resources": ["scripts/Query.js"],
-   "background": {
-         "scripts": [
-         "scripts/storageController.js",
-         "scripts/CSP.js"
-       ],
-       "persistent": true
+   "web_accessible_resources": [
+		{
+		  "resources": ["scripts/Query.js"],
+		  "matches": [ "https://query.vndb.org/*", "https://vndb.org/*" ],
+		  "use_dynamic_url": true
+		}
+	],
+	"background": {
+        "service_worker": "scripts/storageController.js"
    },
-   "browser_action": {},
    "description":"Improves readability and automatically adds images and useful information to VNDB visual novel lists.",
    "icons":{ 
       "128":"icons/icon-128.png",
@@ -46,16 +47,27 @@
       "48":"icons/icon-48.png",
       "96":"icons/icon-96.png"
    },
-   "manifest_version":2,
+   "manifest_version":3,
    "name":"VNDB Extender 2020",
    "permissions":[ 
-      "https://vndb.org/*",
-      "https://query.vndb.org/*",
       "webRequest",
       "storage",
-      "unlimitedStorage",  
-      "webRequestBlocking",
+      "unlimitedStorage",
+	  "declarativeNetRequest",
+	  "declarativeNetRequestFeedback",
       "browsingData"
    ],
-   "version":"3.0.0"
+    "declarative_net_request" : {
+		"rule_resources" : [{
+		  "id": "vndb_query_enabler",
+		  "enabled": true,
+		  "path": "rule1.json"
+		}]
+	  },
+   "action": {},
+   "host_permissions": [
+      "https://vndb.org/*",
+      "https://query.vndb.org/*"
+	],
+   "version":"3.0.2"
 }

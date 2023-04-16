@@ -315,14 +315,16 @@ class MainController {
 				} catch { vn.status = null; }
 				
 				try {
-					vn.releases = entries[i].getElementsByClassName("tc1")[0].innerHTML;
+					vn.releases = entries[i].getElementsByClassName("tc1")[0].lastChild.firstChild.innerText;
 				} catch { vn.releases = null; }
 				
 				try {
 					vn.castDate = entries[i].getElementsByClassName("tc_voted")[0].innerText.split('-').join('/');
 					// On our own list, the cast date takes some more effort to cut out
 					if (vn.castDate.indexOf("<input") > -1) 
-						vn.castDate = vn.castDate.substring(vn.castDate.indexOf("\">") + 2, vn.castDate.length);					
+						vn.castDate = vn.castDate.substring(vn.castDate.indexOf("\">") + 2, vn.castDate.length);	
+					if (vn.castDate == "/")
+						vn.castDate = null;
 				} catch { vn.castDate = null; }
 				
 				try {
@@ -402,7 +404,14 @@ class MainController {
         for (var i = 0; i < entries.length; i++) {
             if (scope.isValidVNRow(entries[i])) {
 
-                entries[i].getElementsByClassName("tc_rating")[0].getElementsByTagName("b")[0].remove();
+                var rating = entries[i].getElementsByClassName("tc_rating")[0];
+				
+				if (rating.getElementsByTagName("b").length > 0)
+					rating.getElementsByTagName("b")[0].remove();
+				
+				if (rating.getElementsByTagName("small").length > 0)
+					rating.getElementsByTagName("small")[0].remove();
+				
                 var Title = entries[i].getElementsByClassName("tc_title");
                 if (Title.length == 0)
                     Title = entries[i].getElementsByClassName("tc_t");
