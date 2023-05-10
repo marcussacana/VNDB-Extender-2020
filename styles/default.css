@@ -47,8 +47,8 @@ form.managelabels > .stripe tfoot {
 
 .vnext-darken {
 	background-color: rgba(0, 0, 0, 0.6);
-	width: 150px;
-	height: 200px;
+	width: 200px;
+	height: 267px;
 	padding: 5px;
 	opacity: 0;
 	animation-name: fade-out;
@@ -109,10 +109,10 @@ img.custom-cover.nsfw.nothover:not(.noblur){
 
 .vnext-vote {
 	position: absolute;
-	top: 75px;
+	top: 100px;
 	left: 0px;
 	right: 0px;
-	bottom: 70px;
+	bottom: 95px;
 	font-size: 48px;
 	color: #FFF;
 	background-color: #8d241e;

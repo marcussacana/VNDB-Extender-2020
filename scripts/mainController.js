@@ -241,7 +241,7 @@ class MainController {
     /// -----------------------------------------------------------
     finalizeMainboxSize() {
         let mainbox = this.getMainbox(),
-            itemSize = 170,
+            itemSize = 212,
             minSize = 750,
             itemCount = Math.floor((mainbox.offsetWidth - 10) / itemSize),
             actualItemCount = this.getItemCount(),
@@ -253,10 +253,6 @@ class MainController {
             finalSize = (itemSize * itemCount);
         }
 		
-		//some resolutions this will prevent a big lost of free space in the list
-		if ((finalSize + itemSize) - (mainbox.offsetWidth - 10) < (itemSize/5))
-			finalSize += itemSize;
-	
 		finalSize += 10;
 
         if (finalSize < minSize) {
@@ -268,7 +264,7 @@ class MainController {
         let maintabs = document.getElementsByClassName("tableopts");
         for (var i = 0; i < maintabs.length; i++) {
 			var OriSize = maintabs[i].offsetWidth;
-            maintabs[i].style.width = (OriSize+60)+ "px";
+            maintabs[i].style.width = (OriSize+149)+ "px";
         }
 		
 		var vnList = mainbox.getElementsByTagName('table');
