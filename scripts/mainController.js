@@ -5,7 +5,7 @@ class MainController {
     constructor() {
         this.preferences = new PreferencesController();
         this.assets = new VnAssetsController();
-        this.builder = new BuildController();
+        this.builder = new BuildController(this.getMainbox());
         this.AsyncCover = true;
     }
 
@@ -85,7 +85,7 @@ class MainController {
         scope.builder.buildPreferences(scope.onPreferenceChanged, scope);
         scope.executePreferencesDynamic();
         scope.executePreferencesStaticVisually();
-        document.getElementsByClassName("mainbox")[1].getElementsByTagName("table")[0].classList.add("show");
+        this.getMainbox().getElementsByTagName("table")[0].classList.add("show");
     }
 
     /// ------------------------------------------
@@ -165,7 +165,7 @@ class MainController {
             document.querySelector("#VNEXT-QueryPref").disabled = true;
             document.querySelector("#VNEXT-DisablePref").checked = true;
 
-            document.getElementsByClassName("mainbox")[1].getElementsByTagName("tbody")[0].setAttribute("style", "display: table-row-group;");
+            this.getMainbox().getElementsByTagName("tbody")[0].setAttribute("style", "display: table-row-group;");
 
             var CfgMenu = document.querySelector("#VNEXT-PrefsContainer");
             CfgMenu.setAttribute("style", "padding-bottom: 15px;");
@@ -240,7 +240,7 @@ class MainController {
     /// Sets the main box to a final size to wrap around the items.
     /// -----------------------------------------------------------
     finalizeMainboxSize() {
-        let mainbox = document.getElementsByClassName("mainbox")[1],
+        let mainbox = this.getMainbox(),
             itemSize = 170,
             minSize = 750,
             itemCount = Math.floor((mainbox.offsetWidth - 10) / itemSize),
@@ -265,10 +265,15 @@ class MainController {
 
         mainbox.style.width = finalSize + "px";
 		
-        let maintabs = document.getElementsByClassName("maintabs");
+        let maintabs = document.getElementsByClassName("tableopts");
         for (var i = 0; i < maintabs.length; i++) {
-            maintabs[i].style.width = finalSize+ "px";
+			var OriSize = maintabs[i].offsetWidth;
+            maintabs[i].style.width = (OriSize+60)+ "px";
         }
+		
+		var vnList = mainbox.getElementsByTagName('table');
+		if (vnList.length > 0)
+			vnList[0].style.display = 'none';
     }
 
     /// --------------------------------------------------------
@@ -557,10 +562,8 @@ class MainController {
     /// Returns a list of vn's from the default VNDB page.
     /// --------------------------------------------------
     getEntries() {
-        var stripes = document.getElementsByClassName("mainbox");
-        if (stripes.length < 2)
-            return null;
-        stripes = stripes[1].getElementsByTagName("table")[0];
+		var stripes = this.getMainbox();
+		
         if (stripes == null) {
             return null;
         } else {
@@ -573,6 +576,16 @@ class MainController {
             }
         }
     }
+
+	getMainbox(){
+		var stripes = document.getElementsByClassName("mainbox");
+        if (stripes.length >= 2)
+            return stripes[1];
+		stripes = document.getElementsByClassName("ulist");
+        if (stripes.length > 0)
+            return stripes[0];
+		throw new DOMException('Failed to Find the mainbox');
+	}
 
     /// -------------------------------------------------
     /// Returns which page we're on; list, votes or wish.

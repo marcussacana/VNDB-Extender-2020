@@ -2,8 +2,8 @@
 /// Builds new VN entries.
 /// ----------------------
 class BuildController {
-	constructor() {
-		this.mainBox = document.getElementsByClassName("mainbox")[1];
+	constructor(mbox) {
+		this.mainBox = mbox;
 		this.container = null;
 	}
 	
