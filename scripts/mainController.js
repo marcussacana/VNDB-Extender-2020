@@ -580,6 +580,9 @@ class MainController {
 		stripes = document.getElementsByClassName("ulist");
         if (stripes.length > 0)
             return stripes[0];
+		stripes = document.getElementsByClassName('stripe');
+        if (stripes.length > 0)
+            return stripes[0].parentElement;		
 		throw new DOMException('Failed to Find the mainbox');
 	}
 
