@@ -246,6 +246,19 @@ class PreferencesController {
 		this.savePreferences();
 	}
 	
+	getBigMode(){
+		try {
+			return this.preferences["bigmode"];
+		} catch(ex) {
+			return true;
+		}
+	}
+	
+	setBigMode(value) {
+		this.preferences["bigmode"] = value;
+		this.savePreferences();
+	}
+	
 	/// ------------------------------------------
 	/// Writes the current preferences to storage.
 	/// ------------------------------------------

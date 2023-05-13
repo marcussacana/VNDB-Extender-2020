@@ -41,7 +41,7 @@ class BuildController {
 		}
 		
 		let prefVisibilityLabel = document.createElement("P");
-		prefVisibilityLabel.appendChild(document.createTextNode("Always Show the VN Info"));
+		prefVisibilityLabel.appendChild(document.createTextNode("Show VN Info"));
 		prefVisibilityLabel.className = "vnext-pref-label";
 		
 		let prefNSFWInput = document.createElement("INPUT");
@@ -77,7 +77,7 @@ class BuildController {
 		}
 		
 		let prefDetailsLabel = document.createElement("P");
-		prefDetailsLabel.appendChild(document.createTextNode("Skip Additional Info"));
+		prefDetailsLabel.appendChild(document.createTextNode("Skip Extra Info"));
 		prefDetailsLabel.className = "vnext-pref-label";
 		
 		let prefDisableInput = document.createElement("INPUT");
@@ -116,6 +116,18 @@ class BuildController {
 		prefQueryLabel.appendChild(document.createTextNode("Query Mode"));
 		prefQueryLabel.className = "vnext-pref-label";
 		
+		let prefBigInput = document.createElement("INPUT");
+		prefBigInput.type = "checkbox";
+		prefBigInput.className = "vnext-pref-checkbox";
+		prefBigInput.id = "VNEXT-BigPref";
+		prefBigInput.onchange = function() {
+			callback("Big", this.checked, callbackScope);
+		}
+
+		let prefBigLabel = document.createElement("P");
+		prefBigLabel.appendChild(document.createTextNode("Big Cover"));
+		prefBigLabel.className = "vnext-pref-label";
+		
 		container.appendChild(prefVisibilityInput);
 		container.appendChild(prefVisibilityLabel);
 		container.appendChild(prefNSFWInput);
@@ -128,6 +140,8 @@ class BuildController {
 		container.appendChild(prefAsyncLabel);
 		container.appendChild(prefQueryInput);
 		container.appendChild(prefQueryLabel);
+		container.appendChild(prefBigInput);
+		container.appendChild(prefBigLabel);
 		container.appendChild(prefDisableInput);
 		container.appendChild(prefDisableLabel);
 		
@@ -137,7 +151,7 @@ class BuildController {
 	/// ------------------------------------
 	/// Builds the list version of an entry.
 	/// ------------------------------------
-	buildEntryList(id, englishTitle, japaneseTitle, status, releases, rating, comment, wishstatus, vote, castDate) {
+	buildEntryList(id, englishTitle, japaneseTitle, status, releases, rating, comment, wishstatus, vote, castDate, bigMode) {
 		let hyperlink = document.createElement("A");
 		hyperlink.href = "/v" + id;
 		
@@ -150,6 +164,8 @@ class BuildController {
 		
 		let darken = document.createElement("DIV");
 		darken.className = "vnext-darken";
+		if (bigMode)
+			darken.className += " big";
 		darken.onmouseover = function() {
 			let tooltipElement = document.getElementById("Vnext-tooltip-" + id);
 			if(tooltipElement != null) {
@@ -281,7 +297,7 @@ class BuildController {
 	/// ------------------------------------
 	/// Builds the browse version of an entry.
 	/// ------------------------------------
-	buildEntryBrowse(id, englishTitle, japaneseTitle, rating, relDate) {
+	buildEntryBrowse(id, englishTitle, japaneseTitle, rating, relDate, bigMode) {
 		let hyperlink = document.createElement("A");
 		hyperlink.href = "/v" + id;
 		
@@ -294,6 +310,9 @@ class BuildController {
 		
 		let darken = document.createElement("DIV");
 		darken.className = "vnext-darken";
+		if (bigMode){
+			darken.className += " big";
+		}
 		darken.onmouseover = function() {
 			let tooltipElement = document.getElementById("Vnext-tooltip-" + id);
 			if(tooltipElement != null) {

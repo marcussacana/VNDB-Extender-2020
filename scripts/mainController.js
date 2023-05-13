@@ -117,6 +117,10 @@ class MainController {
                 scope.preferences.setAsync(value, scope.getPage());
                 location.reload();
                 break;
+			case "Big":
+                scope.preferences.setBigMode(value);
+                location.reload();
+				break;
             case "Query":
                 scope.preferences.setQueryMode(value);
                 location.reload();
@@ -145,6 +149,10 @@ class MainController {
         if (this.preferences.getQueryMode()) {
             document.querySelector("#VNEXT-QueryPref").checked = true;
         }
+		
+        if (this.preferences.getBigMode()) {
+            document.querySelector("#VNEXT-BigPref").checked = true;
+        }
 
         this.AsyncCover = this.preferences.getAsync(currentPage);
 		if (this.AsyncCover == null){
@@ -163,6 +171,7 @@ class MainController {
             document.querySelector("#VNEXT-NsfwPref").disabled = true;
             document.querySelector("#VNEXT-AsyncPref").disabled = true;
             document.querySelector("#VNEXT-QueryPref").disabled = true;
+            document.querySelector("#VNEXT-BigPref").disabled = true;
             document.querySelector("#VNEXT-DisablePref").checked = true;
 
             this.getMainbox().getElementsByTagName("tbody")[0].setAttribute("style", "display: table-row-group;");
@@ -240,8 +249,9 @@ class MainController {
     /// Sets the main box to a final size to wrap around the items.
     /// -----------------------------------------------------------
     finalizeMainboxSize() {
+		let bigMode = this.preferences.getBigMode();
         let mainbox = this.getMainbox(),
-            itemSize = 212,
+            itemSize = bigMode ? 212 : 170,
             minSize = 750,
             itemCount = Math.floor((mainbox.offsetWidth - 10) / itemSize),
             actualItemCount = this.getItemCount(),
@@ -252,6 +262,12 @@ class MainController {
         } else {
             finalSize = (itemSize * itemCount);
         }
+		
+		if (!bigMode){
+			//some resolutions this will prevent a big lost of free space in the list
+			if ((finalSize + itemSize) - (mainbox.offsetWidth - 10) < (itemSize/5))
+				finalSize += itemSize;
+		}
 		
 		finalSize += 10;
 
@@ -264,7 +280,7 @@ class MainController {
         let maintabs = document.getElementsByClassName("tableopts");
         for (var i = 0; i < maintabs.length; i++) {
 			var OriSize = maintabs[i].offsetWidth;
-            maintabs[i].style.width = (OriSize+149)+ "px";
+            maintabs[i].style.width = (OriSize+(bigMode?149:60))+ "px";
         }
 		
 		var vnList = mainbox.getElementsByTagName('table');
@@ -372,7 +388,7 @@ class MainController {
                 }
 
                 // Build the entry
-                scope.builder.buildEntryList(vn.id, vn.englishTitle, vn.japaneseTitle, vn.status, vn.releases, vn.rating, vn.comment, vn.wishstatus, vn.vote, vn.castDate);
+                scope.builder.buildEntryList(vn.id, vn.englishTitle, vn.japaneseTitle, vn.status, vn.releases, vn.rating, vn.comment, vn.wishstatus, vn.vote, vn.castDate, scope.preferences.getBigMode());
 
                 scope.VNList.push(vn);
             }
@@ -432,7 +448,7 @@ class MainController {
 
 
                 // Build the entry
-                scope.builder.buildEntryBrowse(vn.id, vn.englishTitle, vn.japaneseTitle, vn.rating, vn.relDate);
+                scope.builder.buildEntryBrowse(vn.id, vn.englishTitle, vn.japaneseTitle, vn.rating, vn.relDate, scope.preferences.getBigMode());
 
                 scope.VNList.push(vn);
             }

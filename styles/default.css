@@ -47,14 +47,20 @@ form.managelabels > .stripe tfoot {
 
 .vnext-darken {
 	background-color: rgba(0, 0, 0, 0.6);
-	width: 200px;
-	height: 267px;
+	width: 150px;
+	height: 200px;
 	padding: 5px;
 	opacity: 0;
 	animation-name: fade-out;
 	animation-duration: 0.2s;
     position: relative;
     z-index: 2;
+}
+
+
+.vnext-darken.big {
+	width: 200px;
+	height: 267px;
 }
 
 .vnext-darken.always-visible {
@@ -106,13 +112,16 @@ img.custom-cover.nsfw.nothover:not(.noblur){
 	font-family: 'Yu Mincho';
 	font-size: 12px;
 }
-
+.big > .vnext-vote {
+	top: 100px;
+	bottom: 95px;
+}
 .vnext-vote {
 	position: absolute;
-	top: 100px;
+	top: 75px;
 	left: 0px;
 	right: 0px;
-	bottom: 95px;
+	bottom: 70px;
 	font-size: 48px;
 	color: #FFF;
 	background-color: #8d241e;
