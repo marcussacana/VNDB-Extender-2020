@@ -1,73 +1,77 @@
-{ 
-   "author":"Evert Verschoor & Marcussacana",
-   "content_scripts":[ 
-      { 
-         "css":[ 
-            "styles/default.css"
-         ],
-         "js":[
-            "scripts/storageController.js",
-            "scripts/Query.js",
-            "scripts/httpController.js",
-            "scripts/preferencesController.js",
-            "scripts/vnAssetsController.js",
-            "scripts/buildController.js",
-            "scripts/mainController.js",
-            "scripts/default.js"
-         ],
-         "all_frames": true,
-         "matches":[ 
-            "*://query.vndb.org/*",
-            "*://vndb.org/u*/list",
-            "*://vndb.org/u*/votes",
-            "*://vndb.org/u*/wish",
-            "*://vndb.org/u*/list?c=*;v=*;t=*",
-            "*://vndb.org/u*/votes?c=*",
-            "*://vndb.org/u*/wish?f=*",
-            "*://vndb.org/u*/ulist?*",
-            "*://vndb.org/v", 
-            "*://vndb.org/v?*"
-         ]
+{
+  "author": "Evert Verschoor & Marcussacana",
+  "manifest_version": 3,
+  "name": "VNDB Extender 2020",
+  "version": "3.0.7",
+  "description": "Improves readability and automatically adds images and useful information to VNDB visual novel lists.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{f7f34c46-03f4-4871-a337-761ea8dc8bab}",
+      "strict_min_version": "80.0"
+    }
+  },
+  "icons": {
+    "128": "icons/icon-128.png",
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png"
+  },
+  "action": {},
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback",
+    "browsingData"
+  ],
+  "host_permissions": [
+    "https://vndb.org/*",
+    "https://query.vndb.org/*"
+  ],
+  "content_scripts": [
+    {
+      "css": [
+        "styles/default.css"
+      ],
+      "js": [
+        "scripts/storageController.js",
+        "scripts/Query.js",
+        "scripts/httpController.js",
+        "scripts/preferencesController.js",
+        "scripts/vnAssetsController.js",
+        "scripts/buildController.js",
+        "scripts/mainController.js",
+        "scripts/default.js"
+      ],
+      "all_frames": true,
+      "matches": [
+        "*://query.vndb.org/*",
+        "*://vndb.org/u*/list",
+        "*://vndb.org/u*/votes",
+        "*://vndb.org/u*/wish",
+        "*://vndb.org/u*/list?c=*;v=*;t=*",
+        "*://vndb.org/u*/votes?c=*",
+        "*://vndb.org/u*/wish?f=*",
+        "*://vndb.org/u*/ulist?*",
+        "*://vndb.org/v",
+        "*://vndb.org/v?*"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["scripts/Query.js"],
+      "matches": ["https://query.vndb.org/*", "https://vndb.org/*"],
+      "use_dynamic_url": true
+    }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "vndb_query_enabler",
+        "enabled": true,
+        "path": "rule1.json"
       }
-   ],
-   "web_accessible_resources": [
-		{
-		  "resources": ["scripts/Query.js"],
-		  "matches": [ "https://query.vndb.org/*", "https://vndb.org/*" ],
-		  "use_dynamic_url": true
-		}
-	],
-	"background": {
-        "service_worker": "scripts/storageController.js"
-   },
-   "description":"Improves readability and automatically adds images and useful information to VNDB visual novel lists.",
-   "icons":{ 
-      "128":"icons/icon-128.png",
-      "16":"icons/icon-16.png",
-      "48":"icons/icon-48.png",
-      "96":"icons/icon-96.png"
-   },
-   "manifest_version":3,
-   "name":"VNDB Extender 2020",
-   "permissions":[ 
-      "webRequest",
-      "storage",
-      "unlimitedStorage",
-	  "declarativeNetRequest",
-	  "declarativeNetRequestFeedback",
-      "browsingData"
-   ],
-    "declarative_net_request" : {
-		"rule_resources" : [{
-		  "id": "vndb_query_enabler",
-		  "enabled": true,
-		  "path": "rule1.json"
-		}]
-	  },
-   "action": {},
-   "host_permissions": [
-      "https://vndb.org/*",
-      "https://query.vndb.org/*"
-	],
-   "version":"3.0.7"
+    ]
+  }
 }
